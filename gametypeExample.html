@@ -31,7 +31,7 @@
 	cards.init({table: '.table', overrideCards: true});
 
 	//you can create a gametype that overrides the base functionality of a deck! (images, deck size, etc, etc)
-	//You can also set overrides for images here, or do it yourself in your function as shown for getImage
+	//You can also set overrides for images here, or do it yourself in your function as shown for getBackgroundImage
 	gametypes.init(cards, null, {getImageBackgroundURLFunction: overriddenGetBackgroundImage}, function(options, allCards){
 		var deckSize = 48;
 
@@ -55,21 +55,27 @@
 		}
 
 		for(var i = 0; i < deckSize/4; i++){
+			//Last variable let's the library know we are going to override the getImage functionality for each card and thus not to attach it immediately to the table...
 			var cardB = new cards.Card('b', i, cards.options.table, true);
 			var cardY = new cards.Card('y', i, cards.options.table, true);
 			var cardR = new cards.Card('r', i, cards.options.table, true);
 			var cardG = new cards.Card('g', i, cards.options.table, true);
 
+			//Overriding the getImageFunction to pull images with a custom notation
 			cardB.getCardImageURL = getUnoImages;
 			cardY.getCardImageURL = getUnoImages;
 			cardR.getCardImageURL = getUnoImages;
 			cardG.getCardImageURL = getUnoImages;
 
+			//Since we are overriding the GetImages functionality, we have to attach after the deck has been created because
+			//The browser won't know where to get the images at runtime...
 			allCards.push(cardB.attach());
 			allCards.push(cardY.attach());
 			allCards.push(cardR.attach());
 			allCards.push(cardG.attach());
 		}
+
+		//In this example there are wild cards that can't be added through a for loop w/ the others
 		var cardW1 = new cards.Card('w', "", cards.options.table, true);
 		var cardW2 = new cards.Card('w', "p4", cards.options.table, true);
 
@@ -82,12 +88,15 @@
 
 	deck = new cards.Deck();
 
+	//Deck starts in middle of table, so 50 to the left of the center x
 	deck.x -= 50;
 
 	deck.addCards(cards.all);
 
+	//No loading animations, just show deck upon load..
 	deck.render({immediate:true});
 
+	//Two different hands, one is yours (faceUp:true), the other is your opponents (faceUp:false)
 	upperhand = new cards.Hand({faceUp:false, y:60});
 	lowerhand = new cards.Hand({faceUp:true, y:540});
 
@@ -120,12 +129,12 @@
 
 
 
-	//gametype stuff here
+	//Example of creating a gametype, players, and gamemaster to simulate turns
 	exampleGameType = new gametypes.GameType("Uno", cards, [], {});
 	examplePlayer = new gametypes.Player(0, deck, discardPile, []);
 	exampleGameMaster = new gametypes.GameMaster(cards, exampleGameType, [examplePlayer], {});
 
-	exampleGameMaster.run();//will throw an error since this is default and not implemented!
+	exampleGameMaster.run();//will throw an error since this is default and not implemented! All methods needed to run a simple game will be required!
 
 
 
