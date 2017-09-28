@@ -9,7 +9,8 @@ var cards = (function(){
 		acesHigh: false,
 		cardsURL : 'cards/',
 		blackJoker : false,
-		redJoker: false
+		redJoker: false,
+		overrideCards: false
 	};
 
 	var zIndexCounter = 1;
@@ -34,34 +35,38 @@ var cards = (function(){
 			}
 		}
 
-		var start = opt.acesHigh ? 2 : 1;
-		var end = start + 12;
+
 		opt.table = $(opt.table)[0];
 
 		if ($(opt.table).css('position') == 'static') {
 			$(opt.table).css('position', 'relative');
 		}
 
+		if(!opt.overrideCards){
 
-		//create deck of cards and populate to all
-		for (var i = start; i <= end; i++) {
-			all.push(new Card('H', i, opt.table));
-			all.push(new Card('S', i, opt.table));
-			all.push(new Card('D', i, opt.table));
-			all.push(new Card('C', i, opt.table));
+			var start = opt.acesHigh ? 2 : 1;
+			var end = start + 12;
+
+			//create deck of cards and populate to all
+			for (var i = start; i <= end; i++) {
+				all.push(new Card('H', i, opt.table));
+				all.push(new Card('S', i, opt.table));
+				all.push(new Card('D', i, opt.table));
+				all.push(new Card('C', i, opt.table));
+			}
+
+			if(opt.blackJoker) {
+				all.push(new Card('BJ', 0, opt.table));
+			}
+
+			if(opt.redJoker) {
+				all.push(new Card('RJ', 0, opt.table));
+			}
+
+			$('.card').click(mouseEvent);
+
+			shuffle(all);
 		}
-
-		if(opt.blackJoker) {
-			all.push(new Card('BJ', 0, opt.table));
-		}
-
-		if(opt.redJoker) {
-			all.push(new Card('RJ', 0, opt.table));
-		}
-
-		$('.card').click(mouseEvent);
-
-		shuffle(all);
 	}
 
 	function shuffle(deck){
