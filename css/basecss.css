@@ -16,5 +16,17 @@ body{
 }
 
 .container h2{
-	
+
+}
+
+.table{
+	background:darkgreen;
+	margin:auto;
+	width:950px;
+	height:600px;
+}
+
+#deal{
+	color:red;
+	cursor:pointer;
 }
