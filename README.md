@@ -9,6 +9,6 @@ To use simply download the project and open either gametypeExample.html or gener
 The generic example is a simple card game using the base library, while the gametype example uses the base library plus the extension to change the game type/deck size to uno.
 
 ## License
-This project uses the MIT license and is heavily inspired by Card.js, and uses CCO resources.
+This project uses the MIT license and is heavily inspired by Card.js, and uses CC resources.
 
 
