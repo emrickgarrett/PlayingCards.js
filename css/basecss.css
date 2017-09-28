@@ -1,0 +1,20 @@
+
+
+body{
+	padding:10px;
+	background:lightgray;
+}
+
+.container{
+	margin:auto;
+	width:1000;
+	height:800px;
+	background:white;
+	border-radius: 5px;
+	border: 1px solid black;
+	text-align:center;
+}
+
+.container h2{
+	
+}
