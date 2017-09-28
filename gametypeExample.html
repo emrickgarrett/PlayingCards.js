@@ -120,7 +120,7 @@
 	});
 
 	lowerhand.click(function(card){
-		if (card.suit == discardPile.topCard().suit || card.rank == discardPile.topCard().rank) {
+		if (card.suit == discardPile.topCard().suit || card.rank == discardPile.topCard().rank || card.suit === "w" || discardPile.topCard().suit === "w") {
 			discardPile.addCard(card);
 			discardPile.render();
 			lowerhand.render();
