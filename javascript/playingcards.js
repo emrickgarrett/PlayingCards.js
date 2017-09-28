@@ -5,9 +5,9 @@ var cards = (function(){
 		cardSize: {width: 69, height: 94, padding:18},
 		animationSpeed: 500,
 		table: 'body',
-		cardback: 'blue',
+		cardback: 'default',
 		acesHigh: false,
-		cardsURL : 'cards-svg/',
+		cardsURL : 'cards/',
 		blackJoker : false,
 		redJoker: false
 	};
@@ -91,7 +91,11 @@ var cards = (function(){
 				width:opt.cardSize.width,
 				height:opt.cardSize.height,
 				"background-image":'url(' + this.getCardImageURL() + ')',
+				"background-size": opt.cardSize.width + "px " + opt.cardSize.height + "px",
+				"background-repeat": "no-repeat",
 				position:'absolute',
+				border:"1px solid black",
+				"background-color": 'white',
 				cursor:'pointer'
 			}).addClass('card').data('card', this).appendTo($(table));
 			this.showCard();
@@ -159,16 +163,13 @@ var cards = (function(){
 					rank = this.rank;
 				break;
 			}
-			return opt.cardsURL + rank + this.suit + ".svg";
+			return opt.cardsURL + rank + this.suit + ".png";
 		},
 
 		getCardImageBackgroundURL: function(){
 			switch(opt.cardback){
-				case 'red':
-					return opt.cardsURL + "redback.png";
-				break;
-				case 'blue':
-					return opt.cardsURL + "blueback.png";
+				case 'default':
+					return opt.cardsURL + "back.png";
 				break;
 			}
 		}
