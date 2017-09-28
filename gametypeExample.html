@@ -55,30 +55,29 @@
 		}
 
 		for(var i = 0; i < deckSize/4; i++){
-			var cardB = new cards.Card('b', i, cards.options.table);
-			var cardY = new cards.Card('y', i, cards.options.table);
-			var cardR = new cards.Card('r', i, cards.options.table);
-			var cardG = new cards.Card('g', i, cards.options.table);
+			var cardB = new cards.Card('b', i, cards.options.table, true);
+			var cardY = new cards.Card('y', i, cards.options.table, true);
+			var cardR = new cards.Card('r', i, cards.options.table, true);
+			var cardG = new cards.Card('g', i, cards.options.table, true);
 
 			cardB.getCardImageURL = getUnoImages;
 			cardY.getCardImageURL = getUnoImages;
 			cardR.getCardImageURL = getUnoImages;
 			cardG.getCardImageURL = getUnoImages;
 
-
-			allCards.push(cardB);
-			allCards.push(cardY);
-			allCards.push(cardR);
-			allCards.push(cardG);
+			allCards.push(cardB.attach());
+			allCards.push(cardY.attach());
+			allCards.push(cardR.attach());
+			allCards.push(cardG.attach());
 		}
-		var cardW1 = new cards.Card('w', "", cards.options.table);
-		var cardW2 = new cards.Card('w', "p4", cards.options.table);
+		var cardW1 = new cards.Card('w', "", cards.options.table, true);
+		var cardW2 = new cards.Card('w', "p4", cards.options.table, true);
 
 		cardW1.getCardImageURL = getUnoImages;
 		cardW2.getCardImageURL = getUnoImages;
 
-		allCards.push(cardW1);
-		allCards.push(cardW2);
+		allCards.push(cardW1.attach());
+		allCards.push(cardW2.attach());
 	});
 
 	deck = new cards.Deck();

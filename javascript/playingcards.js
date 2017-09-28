@@ -81,30 +81,44 @@ var cards = (function(){
 		}
 	}
 
-	function Card(suit, rank, table){
-		this.init(suit, rank, table);
+	function Card(suit, rank, table, shouldNotAttach){
+		this.init(suit, rank, table, shouldNotAttach);
 	}
 
 	Card.prototype = {
-		init: function(suit, rank, table) {
+		init: function(suit, rank, table, shouldNotAttach) {
 			this.shortName = suit + rank;
 			this.suit = suit;
 			this.rank = rank;
 			this.name = suit.toUpperCase() + rank;
 			this.faceUp = false;
+			this.table = table;
+			if(!shouldNotAttach || shouldNotAttach === null || shouldNotAttach === 'undefined'){
+				this.attach(table);
+			}
+			return this;
+		},
+
+		attach: function(table){
+			if(table && table !== null && table !== 'undefined'){
+				this.table = table;
+			}
+
 			this.el = $('<svg/>').css({
-				width:opt.cardSize.width,
-				height:opt.cardSize.height,
-				"background-image":'url(' + this.getCardImageURL() + ')',
-				"background-size": opt.cardSize.width + "px " + opt.cardSize.height + "px",
-				"background-repeat": "no-repeat",
-				position:'absolute',
-				border:"1px solid black",
-				"background-color": 'white',
-				cursor:'pointer'
-			}).addClass('card').data('card', this).appendTo($(table));
+					width:opt.cardSize.width,
+					height:opt.cardSize.height,
+					"background-image":'url(' + this.getCardImageURL() + ')',
+					"background-size": opt.cardSize.width + "px " + opt.cardSize.height + "px",
+					"background-repeat": "no-repeat",
+					position:'absolute',
+					border:"1px solid black",
+					"background-color": 'white',
+					cursor:'pointer'
+			}).addClass('card').data('card', this).appendTo($(this.table));
 			this.showCard();
 			this.moveToFront();
+
+			return this;
 		},
 
 		toString: function () {
@@ -114,6 +128,8 @@ var cards = (function(){
 		moveTo: function(x, y, speed, callback) {
 			var props = {top:y-(opt.cardSize.height/2), left:x-(opt.cardSize.width/2)};
 			$(this.el).animate(props, speed || opt.animationSpeed, callback);
+
+			return this;
 		},
 
 		rotate: function(angle) {
@@ -123,6 +139,8 @@ var cards = (function(){
 				.css('-ms-transform', 'rotate(' + angle + 'deg)')
 				.css('-transform', 'rotate(' + angle + 'deg)')
 				.css('-o-transform', 'rotate(' + angle + 'deg)');
+
+				return this;
 		},
 
 		showCard: function() {
@@ -137,16 +155,22 @@ var cards = (function(){
 			ypos = -offsets[this.suit] * opt.cardSize.height;
 			this.rotate(0);
 			$(this.el).css('background-image', 'url(' + this.getCardImageURL() + ')');
+
+			return this;
 		},
 
 		hideCard: function(position) {
 			//var y = opt.cardback == 'red' ? 0*opt.cardSize.height : -1*opt.cardSize.height;
 			$(this.el).css('background-image', 'url(' + this.getCardImageBackgroundURL() + ')');
 			this.rotate(0);
+
+			return this;
 		},
 
 		moveToFront: function() {
 			$(this.el).css('z-index', zIndexCounter++);
+
+			return this;
 		},
 
 		getCardImageURL: function(){
