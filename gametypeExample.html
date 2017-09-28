@@ -25,13 +25,61 @@
 
 	//example of how to override the imagefiles
 	var overriddenGetBackgroundImage = function(){
-		return "cards/2C.png";
+		return "uno-cards/card_back_alt.png";
 	}
 
 	cards.init({table: '.table', overrideCards: true});
 
 	//you can create a gametype that overrides the base functionality of a deck! (images, deck size, etc, etc)
-	gametypes.init(cards, null, {getImageBackgroundURLFunction: overriddenGetBackgroundImage});
+	//You can also set overrides for images here, or do it yourself in your function as shown for getImage
+	gametypes.init(cards, null, {getImageBackgroundURLFunction: overriddenGetBackgroundImage}, function(options, allCards){
+		var deckSize = 48;
+
+		var getUnoImages = function(){
+			var rank = this.rank;
+			var suit = this.suit;
+
+			switch(this.rank){
+				case 10:
+					rank = "p2";
+				break;
+				case 11:
+					rank = "r";
+				break;
+				case 12:
+					rank = "s";
+				break;
+			}
+
+			return "uno-cards/" + suit + rank + ".png";
+		}
+
+		for(var i = 0; i < deckSize/4; i++){
+			var cardB = new cards.Card('b', i, cards.options.table);
+			var cardY = new cards.Card('y', i, cards.options.table);
+			var cardR = new cards.Card('r', i, cards.options.table);
+			var cardG = new cards.Card('g', i, cards.options.table);
+
+			cardB.getCardImageURL = getUnoImages;
+			cardY.getCardImageURL = getUnoImages;
+			cardR.getCardImageURL = getUnoImages;
+			cardG.getCardImageURL = getUnoImages;
+
+
+			allCards.push(cardB);
+			allCards.push(cardY);
+			allCards.push(cardR);
+			allCards.push(cardG);
+		}
+		var cardW1 = new cards.Card('w', "", cards.options.table);
+		var cardW2 = new cards.Card('w', "p4", cards.options.table);
+
+		cardW1.getCardImageURL = getUnoImages;
+		cardW2.getCardImageURL = getUnoImages;
+
+		allCards.push(cardW1);
+		allCards.push(cardW2);
+	});
 
 	deck = new cards.Deck();
 

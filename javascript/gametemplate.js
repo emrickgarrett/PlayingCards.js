@@ -22,7 +22,7 @@ var gametypes = (function(){
 		}
 	}
 
-	function init(cards, players, options) {
+	function init(cards, players, options, buildDeckFunction) {
 		if (options) {
 			for (var i in options) {
 				if (opt.hasOwnProperty(i)) {
@@ -36,37 +36,49 @@ var gametypes = (function(){
 
 		var Card = cards.Card;
 
-		//create deck of cards and populate to all
-		for (var i = start; i <= end; i++) {
-			var cardH = new Card('H', i, cards.options.table);
-			var cardS = new Card('S', i, cards.options.table);
-			var cardD = new Card('D', i, cards.options.table);
-			var cardC = new Card('C', i, cards.options.table);
+		if(buildDeckFunction === null || buildDeckFunction === 'undefined' || !buildDeckFunction){
+			//create deck of cards and populate to all
+			for (var i = start; i <= end; i++) {
+				var cardH = new Card('H', i, cards.options.table);
+				var cardS = new Card('S', i, cards.options.table);
+				var cardD = new Card('D', i, cards.options.table);
+				var cardC = new Card('C', i, cards.options.table);
 
-			//Override GetImageUrl of Card
-			if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
-				cardH.getCardImageURL = opt.getImageURLFunction;
-				cardS.getCardImageURL = opt.getImageURLFunction;
-				cardD.getCardImageURL = opt.getImageURLFunction;
-				cardC.getCardImageURL = opt.getImageURLFunction;
+				//Override GetImageUrl of Card
+				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
+					cardH.getCardImageURL = opt.getImageURLFunction;
+					cardS.getCardImageURL = opt.getImageURLFunction;
+					cardD.getCardImageURL = opt.getImageURLFunction;
+					cardC.getCardImageURL = opt.getImageURLFunction;
+				}
+
+				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
+					cardH.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
+					cardS.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
+					cardD.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
+					cardC.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
+
+				}
+
+				cards.all.push(cardH);
+				cards.all.push(cardS);
+				cards.all.push(cardD);
+				cards.all.push(cardC);
 			}
+		}else{
+			buildDeckFunction(opt, cards.all);
 
-			if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
-				cardH.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
-				cardS.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
-				cardD.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
-				cardC.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
-
+			for(var i = 0; i < cards.all.length; i++){
+				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
+					cards.all[i].getCardImageURL = opt.getImageURLFunction;
+				}
+				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
+					cards.all[i].getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
+				}
 			}
-
-			cards.all.push(cardH);
-			cards.all.push(cardS);
-			cards.all.push(cardD);
-			cards.all.push(cardC);
 		}
 
 		$('.card').click(mouseEvent);
-
 		cards.shuffle(cards.all);
 
 	}
