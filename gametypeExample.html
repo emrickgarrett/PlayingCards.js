@@ -14,6 +14,7 @@
 	<div class="container">
 		<h2> Playing Cards Game Example </h2>
 		<h3 id="deal"> Deal! </h3>
+		<h3 id="chat"> Chat! </h3>
 
 
 		<div class="table">
@@ -141,11 +142,15 @@
 
 	exampleGameMaster.run();//will throw an error since this is default and not implemented! All methods needed to run a simple game will be required!
 
-	var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'150px', chatCallback: function(message){
-		chatBox.sendMessage(message);
-	}});
+	$("#chat").click(function(){
+		$("#chat").hide();
 
-	chatBox.render();
+		var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'150px', chatCallback: function(message){
+			chatBox.sendMessage(message);
+		}});
+
+		chatBox.render();
+	});
 
 
 

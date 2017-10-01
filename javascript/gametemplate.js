@@ -287,6 +287,12 @@ var gametypes = (function(){
 				$(this).css(defInputCSS);
 			});
 
+			this.chatInput.keypress(function(e) {
+				if(e.which == 13){
+					me.chatButtonClicked(me.callback);
+				}
+			})
+
 			this.chatButtonSend.hover(
 				function() {
 				//apply temp css
@@ -302,7 +308,6 @@ var gametypes = (function(){
 			this.chatButtonSend.click(function(){
 				me.chatButtonClicked(me.callback);
 			});
-
 		},
 
 		chatButtonClicked: function(callback){
@@ -321,7 +326,8 @@ var gametypes = (function(){
 		sendMessage: function(message, senderName, options){
 			var defMessageCSS = {
 				left: 0,
-				display: "block"
+				display: "block",
+				padding: "2px"
 			}
 
 			var nameCSS = {

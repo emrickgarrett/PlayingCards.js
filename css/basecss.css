@@ -26,7 +26,17 @@ body{
 	height:600px;
 }
 
-#deal{
-	color:red;
+#chat, #deal{
+	background-color: #2196F3;
+	border:1px solid black;
+	border-radius:3px;
+	padding:2px;
+	color:white;
 	cursor:pointer;
+	display:inline-block;
+
+}
+
+#chat:hover, #deal:hover{
+	background-color: #3f51b5;
 }
