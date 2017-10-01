@@ -361,6 +361,7 @@ var gametypes = (function(){
 			var builtMessage = $("<span/>").css(nameCSS).html(sender).prop('outerHTML') + " : " + message;
 
 			$('<span/>').css(defMessageCSS).addClass("pcjs_chatMessage").data("message", builtMessage).appendTo(this.chatArea).html(builtMessage);
+			this.chatArea.scrollTop(function() { return this.scrollHeight;});
 
 		},
 
