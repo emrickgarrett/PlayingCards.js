@@ -241,7 +241,8 @@ var gametypes = (function(){
 		render: function(){
 			var me = this;
 			var inputIdName = "pcjs_chatInput";
-			var buttonIdName = "pcjs_chatboxSendButton"
+			var buttonIdName = "pcjs_chatboxSendButton";
+			var chatAreaIdName = "pcjs_chatArea";
 			var defInputCSS = {
 				position:'absolute',
 				width: '80%',
@@ -269,9 +270,18 @@ var gametypes = (function(){
 				color:"white",
 				"background-color": "#2196F3",
 				cursor: "pointer"
-			}
+			};
+			var defChatAreaCSS = {
+				position: 'absolute',
+				display: 'inline-block',
+				width:'100%',
+				height: ($('#pcjs_chatbox').height() - 20) + "px",
+				left: 0,
+				top: 0,
+				"overflow-y":"scroll"
+			};
 
-
+			this.chatArea = $("<div/>").css(defChatAreaCSS).attr("id", chatAreaIdName).data("chatArea", this).appendTo($('#pcjs_chatbox'));
 			this.chatInput = $('<input/>').css(defInputCSS).attr("id", inputIdName).data('input', this).appendTo($('#pcjs_chatbox'));
 			this.chatButtonSend = $('<input type=\'button\'/>').css(defButtonCSS).attr("id", buttonIdName).attr('value', '>').data('button', this).appendTo($('#pcjs_chatbox'));
 
@@ -350,7 +360,7 @@ var gametypes = (function(){
 
 			var builtMessage = $("<span/>").css(nameCSS).html(sender).prop('outerHTML') + " : " + message;
 
-			$('<span/>').css(defMessageCSS).addClass("pcjs_chatMessage").data("message", builtMessage).appendTo($('#pcjs_chatbox')).html(builtMessage);
+			$('<span/>').css(defMessageCSS).addClass("pcjs_chatMessage").data("message", builtMessage).appendTo(this.chatArea).html(builtMessage);
 
 		},
 
