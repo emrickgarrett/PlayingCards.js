@@ -26,6 +26,16 @@ var cards = (function(){
 		}
 	}
 
+	function mouseOver(ev){
+		var card = $(this).data('card');
+		if(card.container) {
+			var handler = card.container._mouseover;
+			if (handler) {
+				handler.func.call(handler.context || window, card, ev);
+			}
+		}
+	}
+
 	function init(options) {
 		if (options) {
 			for (var i in options) {
@@ -64,6 +74,7 @@ var cards = (function(){
 			}
 
 			$('.card').click(mouseEvent);
+			$('.card').mouseover(mouseOver);
 
 			shuffle(all);
 		}
@@ -104,7 +115,7 @@ var cards = (function(){
 				this.table = table;
 			}
 
-			this.el = $('<svg/>').css({
+			this.el = $('<div/>').css({
 					width:opt.cardSize.width,
 					height:opt.cardSize.height,
 					"background-image":'url(' + this.getCardImageURL() + ')',
@@ -258,6 +269,10 @@ var cards = (function(){
 
 		mouseup: function(func, context){
 			this._mouseup = {func: func, context:context};
+		},
+
+		mouseover : function(func, context){
+			this._mouseover = {func: func, context:context};
 		},
 
 		render : function(options){
