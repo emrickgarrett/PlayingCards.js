@@ -118,14 +118,13 @@ var gametypes = (function(){
 
 	}
 
-	function Player(id, name, hand, deck, pile, options){
-		this.init(id, name, hand, deck, pile, options);
+	function Player(id, hand, deck, pile, options){
+		this.init(id, hand, deck, pile, options);
 	}
 
 	Player.prototype = {
-		init: function(id, name, hand, deck, pile, options){
+		init: function(id, hand, deck, pile, options){
 			this.id = id;
-			this.name = name;
 			this.hand = hand;
 			this.deck = deck;
 			this.pile = pile;
@@ -146,7 +145,9 @@ var gametypes = (function(){
 				color: "white",
 				textAlign: "left",
 				renderUIFunc: null,
-				AI: true
+				AI: true,
+				sendGreeting: true,
+				name: null
 			};
 
 			this.calcPosition(id, this.options.players, hand);			
@@ -161,12 +162,24 @@ var gametypes = (function(){
 
 			if(this.options.AI){
 				this.AI = new AI(hand, deck, pile);
-				this.name = (this.name === null || typeof this.name === "undefined" || this.name === "") ? this.AI.name: this.name;
-				this.AI.sendMessage(this.AI.getGreeting());
+			}
+
+			if(this.options.name === null || typeof this.options.name === "undefined"){
+				if(this.options.AI){
+					this.name = this.AI.name;
+				}else{
+					this.name = generatedUserName();
+				}
+			}else{
+				this.name = this.options.name;
 			}
 
 			if(this.options.displayUI){
 				this.renderUI();
+			}
+
+			if(this.options.sendGreeting && this.options.AI){
+				this.AI.sendMessage(this.AI.getGreeting());									
 			}
 
 		},
