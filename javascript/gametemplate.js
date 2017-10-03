@@ -1,6 +1,7 @@
 var gametypes = (function(){
 
 	var opt = {
+				table: 'body',
 				handSize: 5,
 				players: 4,
 				teams: false,
@@ -32,7 +33,7 @@ var gametypes = (function(){
 		}
 	}
 
-	function init(cards, players, options, buildDeckFunction) {
+	function init(cards, options, buildDeckFunction) {
 		if (options) {
 			for (var i in options) {
 				if (opt.hasOwnProperty(i)) {
@@ -117,21 +118,118 @@ var gametypes = (function(){
 
 	}
 
-	function Player(id, deck, pile, players){
-		this.init(id, deck, pile, players);
+	function Player(id, name, hand, deck, pile, options){
+		this.init(id, name, hand, deck, pile, options);
 	}
 
 	Player.prototype = {
-		init: function(id, name, deck, pile, players){
+		init: function(id, name, hand, deck, pile, options){
 			this.id = id;
 			this.name = name;
+			this.hand = hand;
 			this.deck = deck;
 			this.pile = pile;
-			this.players = players;
+			
+			this.options = {
+				players: 2,
+				displayUI: true,
+				width: "auto",
+				height: "auto",
+				border: "none",
+				padding: "5px",
+				position: "absolute",
+				top: "auto",
+				left: "auto",
+				right: "auto",
+				bottom: "auto",
+				backgroundColor: "auto",
+				color: "white",
+				textAlign: "left",
+				renderUIFunc: null
+			};
+
+			this.calcPosition(id, this.options.players, hand);			
+
+			if (options) {
+				for (var i in options) {
+					if (this.options.hasOwnProperty(i)) {
+						this.options[i] = options[i];
+					}
+				}
+			}
+
+			if(this.options.displayUI){
+				this.renderUI();
+			}
+
 		},
 
 		toString: function(){
 			return "Name: " + this.name + ", id: " + this.id;
+		},
+
+		renderUI: function(){
+			if(this.options.renderUIFunc === "undefined" || this.options.renderUIFunc === null){
+				this.el = $('<div/>').css({
+					width:this.options.width,
+					height:this.options.height,
+					position:this.options.position,
+					border:this.options.border,
+					"background-color": this.options.backgroundColor,
+					color: this.options.color,
+					top: this.options.top,
+					left: this.options.left,
+					right: this.options.right,
+					bottom: this.options.bottom,
+					padding: this.options.padding,
+					"text-align": this.options.textAlign
+				}).attr('id', 'player' + this.id + 'ui').data('player', this).appendTo($(opt.table)); 
+
+				this.nameEl = $('<span/>').css({
+					"font-weight": "bold",
+					color : this.options.color,
+					"font-size": "2em"
+				}).text(this.name).appendTo(this.el);
+			}else{
+				//You can decide not to render a UI or you can use the options to render a UI yourself...
+				this.options.renderUIFunc(this.options);
+			}
+
+		},
+
+		calcPosition: function(id, players, hand){
+			if(players < 4){
+				if(players > 2){
+					switch(id){
+						case 0:
+						// bottom of table
+						break;
+						case 1:
+						// left of table
+						break;
+						case 2:
+						// top of table
+						break;
+						case 3:
+						// right of table
+						break;
+					}
+				}else{
+					if(id === 0){
+						// bottom of table
+						console.log(hand.x + ", " + hand.y + " p1");
+						this.options.right = 0;
+						this.options.bottom = 0;
+					}else{
+						// top of table
+						console.log(hand.x + ", " + hand.y + " p2");
+						this.options.left = 0;
+						this.options.top = 0;
+					}
+				}
+			}else{ // Game has 5-many players
+
+			}
 		}
 	}
 
@@ -361,6 +459,61 @@ var gametypes = (function(){
 				this.generatedUserNameString = "User" + parseInt(Math.random()*10000);
 				return this.generatedUserNameString;
 			}
+		}
+	}
+
+	function AI(hand, deck, pile, callback){
+		this.init(hand, deck, pile, callback);
+	}
+
+	AI.prototype = {
+		init: function(hand, deck, pile, callback){
+			this.hand = hand;
+			this.deck = deck;
+			this.pile = pile;
+			this.callback = callback;
+			this.name = generateAIName();
+		},
+
+		generateAIName: function(){
+			var nameResult = "";
+			switch(parseInt(Math.random()*10)){
+				case 0:
+					nameResult = "Tim";
+				break;
+				case 1:
+					nameResult = "Hugh";
+				break;
+				case 2:
+					nameResult = "Randy";
+				break;
+				case 3:
+					nameResult = "Elias";
+				break;
+				case 4:
+					nameResult = "Erik";
+				break;
+				case 5:
+					nameResult = "Kim";
+				break;
+				case 6:
+					nameResult = "Damon";
+				break;
+				case 7:
+					nameResult = "George";
+				break;
+				case 8:
+					nameResult = "Jodi";
+				break;
+				case 9:
+					nameResult = "Ruth";
+				break;
+				case 10:
+					nameResult = "Alex";
+				break;
+			}
+
+			return nameResult + " Bot";
 		}
 	}
 
