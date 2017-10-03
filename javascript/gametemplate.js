@@ -217,12 +217,10 @@ var gametypes = (function(){
 				}else{
 					if(id === 0){
 						// bottom of table
-						console.log(hand.x + ", " + hand.y + " p1");
 						this.options.right = 0;
 						this.options.bottom = 0;
 					}else{
 						// top of table
-						console.log(hand.x + ", " + hand.y + " p2");
 						this.options.left = 0;
 						this.options.top = 0;
 					}
@@ -271,8 +269,10 @@ var gametypes = (function(){
 				left:"10px",
 				right: "auto",
 				bottom: "10px",
+				maximized: true,
 				callback: null,
-				chatCallback: null //Overriding the chat callback will require you to send the message yourself!
+				chatCallback: null, //Overriding the chat callback will require you to send the message yourself!
+				toolbarCallback: null
 			}
 
 			if (options) {
@@ -306,6 +306,13 @@ var gametypes = (function(){
 
 
 			this.input = this.createChatInput(this.options.chatCallback, speed);
+			this.toolbar = this.createToolbar(this.options.toolbarCallback, speed);
+
+			if(this.options.maximized){
+				this.maximize();
+			}else{
+				this.minimize();
+			}
 
 			if (this.options.callback) {
 				setTimeout(this.options.chatCallback, speed);
@@ -318,20 +325,72 @@ var gametypes = (function(){
 			return new ChatInput(callback, speed);
 		},
 
-		sendMessage(message, senderName, options){
+		createToolbar: function(callback, speed){
+			return new ChatToolBar(this, this.toolbarCallback, speed);
+		},
+
+		sendMessage: function(message, senderName, options){
 			this.input.sendMessage(message, senderName, options);
+		},
+
+		maximize: function(){
+			this.input.show();
+			this.el.height(this.options.height);
+			this.el.show();
+			this.toolbar.maximize();
+		},
+
+		minimize: function(){
+			this.input.hide();
+			this.el.height(this.toolbar.size);
+			this.toolbar.minimize();
+		},
+
+		close: function(){
+			this.el.hide();
+		},
+
+		toolbarCallback: function(caller, actiontype){
+			if(caller.options.toolbarCallback){
+				caller.options.toolbarCallback(actiontype);
+			}else{
+				switch(actiontype){
+					case ChatBoxAction.CLOSE:
+						caller.close();
+					break;
+					case ChatBoxAction.MINIMIZE:
+						caller.minimize();
+					break;
+					case ChatBoxAction.MAXIMIZE:
+						caller.maximize();
+					break;
+				}
+			}
 		}
 
 	}
 
-	function ChatInput(callback, speed){
-		this.init(callback, speed);
+	function ChatInput(callback, speed, colors){
+		this.init(callback, speed, colors);
 	}
 
 	ChatInput.prototype = {
-		init: function(callback, speed){
+		init: function(callback, speed, colors){
 			this.callback = callback;
 			this.speed = speed;
+
+
+			if(colors && colors !== null && colors != "undefined" && colors.count === 4) {
+				this.primaryColor = colors[0];
+				this.secondaryColor = colors[1];
+				this.primaryTextColor = colors[2];
+				this.secondaryTextColor = colors[3];
+			}else{
+				this.primaryTextColor = "white";
+				this.secondaryTextColor = "white";
+				this.primaryColor = "#2196F3";
+				this.secondaryColor = "#3f51b5";
+			}
 
 			this.render();
 		},
@@ -364,8 +423,8 @@ var gametypes = (function(){
 				bottom: "0px",
 				right: 0,
 				text:">",
-				color:"white",
-				"background-color": "#2196F3",
+				color: this.primaryTextColor,
+				"background-color": this.primaryColor,
 				cursor: "pointer"
 			}
 
@@ -375,7 +434,6 @@ var gametypes = (function(){
 
 			//ETC styling for chatInput
 			this.chatInput.focus(function() {
-				//Add temp css on focus I guess...
 				$(this).css({
 					color:"black"
 				});
@@ -395,7 +453,8 @@ var gametypes = (function(){
 				function() {
 				//apply temp css
 				$(this).css({
-					"background-color":"#3f51b5"
+					"background-color":me.secondaryColor,
+					"color": me.secondaryTextColor
 				})
 				},
 				function(){
@@ -413,12 +472,22 @@ var gametypes = (function(){
 			message = this.chatInput.val();
 
 			if(callback){
-				callback(message);
+				callback(ChatBoxAction.SEND, message);
 			}else{
 				this.sendMessage(message);
 			}
 
 			this.chatInput.val("");
+		},
+
+		hide: function(){
+			this.chatInput.hide();
+			this.chatButtonSend.hide();
+		},
+
+		show: function(){
+			this.chatInput.show();
+			this.chatButtonSend.show();
 		},
 
 		sendMessage: function(message, senderName, options){
@@ -460,6 +529,156 @@ var gametypes = (function(){
 				return this.generatedUserNameString;
 			}
 		}
+	}
+
+	function ChatToolBar(caller, callback, speed, colors){
+		this.init(caller, callback, speed, colors);
+	}
+
+	ChatToolBar.prototype = {
+		init: function(caller, callback, speed, colors){
+			this.caller = caller;
+			this.callback = callback;
+			this.speed = speed;
+			this.size = 15;
+
+			if(colors && colors !== null && colors != "undefined" && colors.count === 4) {
+				this.primaryColor = colors[0];
+				this.secondaryColor = colors[1];
+				this.primaryTextColor = colors[2];
+				this.secondaryTextColor = colors[3];
+			}else{
+				this.primaryTextColor = "white";
+				this.secondaryTextColor = "white";
+				this.primaryColor = "#2196F3";
+				this.secondaryColor = "#3f51b5";
+			}
+
+			this.render();
+		},
+
+		render: function(){
+			var me = this;
+
+			var toolbarCSS = {
+				position: "absolute",
+				top: "0",
+				left: "0",
+				right: "auto",
+				bottom: "auto",
+				"background-color": this.primaryColor,
+				width:"100%",
+				height: this.size + "px"
+			};
+			var minimizeCSS = {
+				"background-color": this.primaryColor,
+				color: this.primaryTextColor,
+				float:"right",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer"				
+			};
+			var maximizeCSS = {
+				"background-color": this.primaryColor,
+				color: this.primaryTextColor,
+				float:"right",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer"				
+			};
+			var closeCSS = {
+				"background-color": "red",
+				color: this.primaryTextColor,
+				float:"right",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer"
+			};
+
+			this.toolbar = $("<div/>").css(toolbarCSS).addClass("pcjs_toolbar").data("toolbar", this).appendTo($("#pcjs_chatbox"));
+			this.close = $("<div/>").css(closeCSS).addClass("pcjs_toolbar_close").data("toolbar", this).text("x").appendTo(this.toolbar);
+			this.maximizeDiv = $("<div/>").css(maximizeCSS).addClass("pcjs_toolbar_maximize").data("toolbar", this).text("+").appendTo(this.toolbar);
+			this.minimizeDiv = $("<div/>").css(minimizeCSS).addClass("pcjs_toolbar_minimize").data("toolbar", this).text("-").appendTo(this.toolbar);
+
+			this.close.hover(
+				function(){
+					$(this).css({
+						"background-color": "darkred"
+					})
+				}, 
+				function(){
+					$(this).css(closeCSS);
+				}
+			);
+
+			this.maximizeDiv.hover(
+				function(){
+					$(this).css({
+						"background-color": me.secondaryColor,
+						color: me.secondaryTextColor
+					});
+				},
+				function(){
+					$(this).css(maximizeCSS);
+				}
+			);
+
+			this.minimizeDiv.hover(
+				function(){
+					$(this).css({
+						"background-color": me.secondaryColor,
+						color: me.secondaryTextColor
+					});
+				},
+				function(){
+					$(this).css(minimizeCSS);
+				}
+			);
+
+			this.close.click(function(){
+				if(me.callback){
+					me.callback(me.caller, ChatBoxAction.CLOSE);
+				}
+			});
+
+			this.maximizeDiv.click(function(){
+				if(me.callback){
+					me.callback(me.caller, ChatBoxAction.MAXIMIZE);
+				}
+			});
+
+			this.minimizeDiv.click(function(){
+				if(me.callback){
+					me.callback(me.caller, ChatBoxAction.MINIMIZE);
+				}
+			})
+
+
+		},
+
+		minimize: function(){
+			this.minimizeDiv.hide();
+			this.maximizeDiv.show();
+		},
+
+		maximize: function(){
+			this.maximizeDiv.hide();
+			this.minimizeDiv.show();
+		}
+	}
+
+	ChatBoxAction = {
+		CLOSE: 1,
+		MINIMIZE: 2,
+		MAXIMIZE: 3,
+		SEND: 4,
+		UPDATE: 5
 	}
 
 	function AI(hand, deck, pile, callback){
@@ -524,7 +743,8 @@ var gametypes = (function(){
 		GameType: GameType,
 		Player: Player,
 		GameMaster: GameMaster,
-		ChatBox: ChatBox
+		ChatBox: ChatBox,
+		ChatBoxAction: ChatBoxAction
 	};
 
 })();
