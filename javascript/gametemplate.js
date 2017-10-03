@@ -456,7 +456,7 @@ var gametypes = (function(){
 				position: 'absolute',
 				display: 'inline-block',
 				width:'100%',
-				height: ($('#pcjs_chatbox').height() - 20) + "px",
+				height: ($('#pcjs_chatbox').height() - 35) + "px",
 				left: 0,
 				top: "15px",
 				"overflow-y":"scroll"
