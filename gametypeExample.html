@@ -137,7 +137,7 @@
 
 	//Example of creating a gametype, players, and gamemaster to simulate turns
 	var exampleGameType = new gametypes.GameType("Uno", cards, [], {});
-	var examplePlayer = new gametypes.Player(0,"Hugh", lowerhand, deck, discardPile, {table: '.table'});
+	var examplePlayer = new gametypes.Player(0,"Hugh", lowerhand, deck, discardPile, {table: '.table', AI: false});
 	var examplePlayer2 = new gametypes.Player(1, "Randallo", upperhand, deck, discardPile, {table: '.table'});
 	var exampleGameMaster = new gametypes.GameMaster(cards, exampleGameType, [examplePlayer], {});
 

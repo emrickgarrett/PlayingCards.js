@@ -47,7 +47,7 @@ var gametypes = (function(){
 
 		var Card = cards.Card;
 
-		if(buildDeckFunction === null || buildDeckFunction === 'undefined' || !buildDeckFunction){
+		if(buildDeckFunction === null || typeof buildDeckFunction === 'undefined' || !buildDeckFunction){
 			//create deck of cards and populate to all
 			for (var i = start; i <= end; i++) {
 				var cardH = new Card('H', i, cards.options.table);
@@ -56,14 +56,14 @@ var gametypes = (function(){
 				var cardC = new Card('C', i, cards.options.table);
 
 				//Override GetImageUrl of Card
-				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
+				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && typeof opt.getImageURLFunction !== 'undefined'){
 					cardH.getCardImageURL = opt.getImageURLFunction;
 					cardS.getCardImageURL = opt.getImageURLFunction;
 					cardD.getCardImageURL = opt.getImageURLFunction;
 					cardC.getCardImageURL = opt.getImageURLFunction;
 				}
 
-				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
+				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && typeof opt.getImageBackgroundURLFunction !== 'undefined'){
 					cardH.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
 					cardS.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
 					cardD.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
@@ -80,10 +80,10 @@ var gametypes = (function(){
 			buildDeckFunction(opt, cards.all);
 
 			for(var i = 0; i < cards.all.length; i++){
-				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
+				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && typeof opt.getImageURLFunction !== 'undefined'){
 					cards.all[i].getCardImageURL = opt.getImageURLFunction;
 				}
-				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
+				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && typeof opt.getImageBackgroundURLFunction !== 'undefined'){
 					cards.all[i].getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
 				}
 			}
@@ -145,7 +145,8 @@ var gametypes = (function(){
 				backgroundColor: "auto",
 				color: "white",
 				textAlign: "left",
-				renderUIFunc: null
+				renderUIFunc: null,
+				AI: true
 			};
 
 			this.calcPosition(id, this.options.players, hand);			
@@ -162,6 +163,12 @@ var gametypes = (function(){
 				this.renderUI();
 			}
 
+			if(this.options.AI){
+				this.AI = new AI(hand, deck, pile);
+				this.name = this.AI.name;
+				this.AI.sendMessage(this.AI.getGreeting());
+			}
+
 		},
 
 		toString: function(){
@@ -169,7 +176,7 @@ var gametypes = (function(){
 		},
 
 		renderUI: function(){
-			if(this.options.renderUIFunc === "undefined" || this.options.renderUIFunc === null){
+			if(typeof this.options.renderUIFunc === "undefined" || this.options.renderUIFunc === null){
 				this.el = $('<div/>').css({
 					width:this.options.width,
 					height:this.options.height,
@@ -380,7 +387,7 @@ var gametypes = (function(){
 			this.speed = speed;
 
 
-			if(colors && colors !== null && colors != "undefined" && colors.count === 4) {
+			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
 				this.primaryColor = colors[0];
 				this.secondaryColor = colors[1];
 				this.primaryTextColor = colors[2];
@@ -542,7 +549,7 @@ var gametypes = (function(){
 			this.speed = speed;
 			this.size = 15;
 
-			if(colors && colors !== null && colors != "undefined" && colors.count === 4) {
+			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
 				this.primaryColor = colors[0];
 				this.secondaryColor = colors[1];
 				this.primaryTextColor = colors[2];
@@ -691,7 +698,7 @@ var gametypes = (function(){
 			this.deck = deck;
 			this.pile = pile;
 			this.callback = callback;
-			this.name = generateAIName();
+			this.name = this.generateAIName();
 		},
 
 		generateAIName: function(){
@@ -733,6 +740,58 @@ var gametypes = (function(){
 			}
 
 			return nameResult + " Bot";
+		},
+
+		getTaunt: function(){
+			switch(parseInt(Math.random()*3)){
+				case 0:
+					return "What were you thinking?";
+				break;
+				case 1:
+					return "You're going to regret that!";
+				break;
+				case 2:
+					return "You're making this too easy";
+				break;
+			}
+		},
+
+		getCompliment: function(){
+			switch(parseInt(Math.random()*3)){
+				case 0:
+					return "Great play!";
+				break;
+				case 1:
+					return "What a move!";
+				break;
+				case 2:
+					return "Nice one!";
+				break;
+			}
+		},
+
+		getGreeting: function(){
+			switch(parseInt(Math.random()*3)){
+				case 0:
+					return "Hello!";
+				break;
+				case 1:
+					return "Glad to see you!";
+				break;
+				case 2:
+					return "Let's do this!";
+				break;
+			}
+		},
+
+		sendMessage: function(message){
+			var chatbox = $("#pcjs_chatbox");
+			if(chatbox !== null && typeof chatbox !== "undefined"){
+				var obj = chatbox.data("chatbox");
+				if(obj !== null && typeof obj !== "undefined"){
+					obj.sendMessage(message, this.name);
+				}
+			}
 		}
 	}
 
