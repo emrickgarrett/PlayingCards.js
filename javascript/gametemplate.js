@@ -370,6 +370,10 @@ var gametypes = (function(){
 			this.el.hide();
 		},
 
+		show: function(){
+			this.el.show();
+		},
+
 		toolbarCallback: function(caller, actiontype){
 			if(caller.options.toolbarCallback){
 				caller.options.toolbarCallback(actiontype);

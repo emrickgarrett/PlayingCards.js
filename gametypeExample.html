@@ -143,19 +143,32 @@
 
 	exampleGameMaster.run();//will throw an error since this is default and not implemented! All methods needed to run a simple game will be required!
 
-	$("#chat").click(function(){
-		$("#chat").hide();
-
-		var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'175px', chatCallback: function(type, message){
+	var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'175px', chatCallback: function(type, message){
 			//Since we override the chatCallback we can add on to the message, but must call the sendMessage functionality for it to actually send.
 			//We could also override the name for the message sender (atm is randomly generates a name) by using:
 			//chatBox.sendMessage(message, name);
 			if(type === ChatBoxAction.SEND){
 				chatBox.sendMessage(message);
 			}
-		}});
-
-		chatBox.render();
+		}, toolbarCallback: function(type){
+			if(type === ChatBoxAction.CLOSE){
+				$("#chat").show();
+				chatBox.close();
+			}
+			if(type === ChatBoxAction.MAXIMIZE){
+				chatBox.maximize();
+			}
+			if(type === ChatBoxAction.MINIMIZE){
+				chatBox.minimize();
+			}
+	}});
+	
+	chatBox.render();
+	chatBox.close();
+	
+	$("#chat").click(function(){
+		$("#chat").hide();
+		chatBox.show();
 	});
 
 
