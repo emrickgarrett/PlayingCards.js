@@ -1,6 +1,7 @@
 var gametypes = (function(){
 
 	var opt = {
+				table: 'body',
 				handSize: 5,
 				players: 4,
 				teams: false,
@@ -46,7 +47,7 @@ var gametypes = (function(){
 
 		var Card = cards.Card;
 
-		if(buildDeckFunction === null || buildDeckFunction === 'undefined' || !buildDeckFunction){
+		if(buildDeckFunction === null || typeof buildDeckFunction === 'undefined' || !buildDeckFunction){
 			//create deck of cards and populate to all
 			for (var i = start; i <= end; i++) {
 				var cardH = new Card('H', i, cards.options.table);
@@ -55,14 +56,14 @@ var gametypes = (function(){
 				var cardC = new Card('C', i, cards.options.table);
 
 				//Override GetImageUrl of Card
-				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
+				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && typeof opt.getImageURLFunction !== 'undefined'){
 					cardH.getCardImageURL = opt.getImageURLFunction;
 					cardS.getCardImageURL = opt.getImageURLFunction;
 					cardD.getCardImageURL = opt.getImageURLFunction;
 					cardC.getCardImageURL = opt.getImageURLFunction;
 				}
 
-				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
+				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && typeof opt.getImageBackgroundURLFunction !== 'undefined'){
 					cardH.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
 					cardS.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
 					cardD.getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
@@ -79,10 +80,10 @@ var gametypes = (function(){
 			buildDeckFunction(opt, cards.all);
 
 			for(var i = 0; i < cards.all.length; i++){
-				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && opt.getImageURLFunction !== 'undefined'){
+				if(opt.getImageURLFunction && opt.getImageURLFunction !== null && typeof opt.getImageURLFunction !== 'undefined'){
 					cards.all[i].getCardImageURL = opt.getImageURLFunction;
 				}
-				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && opt.getImageBackgroundURLFunction !== 'undefined'){
+				if(opt.getImageBackgroundURLFunction && opt.getImageBackgroundURLFunction !== null && typeof opt.getImageBackgroundURLFunction !== 'undefined'){
 					cards.all[i].getCardImageBackgroundURL = opt.getImageBackgroundURLFunction;
 				}
 			}
@@ -117,21 +118,136 @@ var gametypes = (function(){
 
 	}
 
-	function Player(id, deck, pile, players){
-		this.init(id, deck, pile, players);
+	function Player(id, hand, deck, pile, options){
+		this.init(id, hand, deck, pile, options);
 	}
 
 	Player.prototype = {
-		init: function(id, name, deck, pile, players){
+		init: function(id, hand, deck, pile, options){
 			this.id = id;
-			this.name = name;
+			this.hand = hand;
 			this.deck = deck;
 			this.pile = pile;
-			this.players = players;
+			
+			this.options = {
+				players: 2,
+				displayUI: true,
+				width: "auto",
+				height: "auto",
+				border: "none",
+				padding: "5px",
+				position: "absolute",
+				top: "auto",
+				left: "auto",
+				right: "auto",
+				bottom: "auto",
+				backgroundColor: "auto",
+				color: "white",
+				textAlign: "left",
+				renderUIFunc: null,
+				AI: true,
+				sendGreeting: true,
+				name: null
+			};
+
+			this.calcPosition(id, this.options.players, hand);			
+
+			if (options) {
+				for (var i in options) {
+					if (this.options.hasOwnProperty(i)) {
+						this.options[i] = options[i];
+					}
+				}
+			}
+
+			if(this.options.AI){
+				this.AI = new AI(hand, deck, pile);
+			}
+
+			if(this.options.name === null || typeof this.options.name === "undefined"){
+				if(this.options.AI){
+					this.name = this.AI.name;
+				}else{
+					this.name = generatedUserName();
+				}
+			}else{
+				this.name = this.options.name;
+			}
+
+			if(this.options.displayUI){
+				this.renderUI();
+			}
+
+			if(this.options.sendGreeting && this.options.AI){
+				this.AI.sendMessage(this.AI.getGreeting());									
+			}
+
 		},
 
 		toString: function(){
 			return "Name: " + this.name + ", id: " + this.id;
+		},
+
+		renderUI: function(){
+			if(typeof this.options.renderUIFunc === "undefined" || this.options.renderUIFunc === null){
+				this.el = $('<div/>').css({
+					width:this.options.width,
+					height:this.options.height,
+					position:this.options.position,
+					border:this.options.border,
+					"background-color": this.options.backgroundColor,
+					color: this.options.color,
+					top: this.options.top,
+					left: this.options.left,
+					right: this.options.right,
+					bottom: this.options.bottom,
+					padding: this.options.padding,
+					"text-align": this.options.textAlign
+				}).attr('id', 'player' + this.id + 'ui').data('player', this).appendTo($(opt.table)); 
+
+				this.nameEl = $('<span/>').css({
+					"font-weight": "bold",
+					color : this.options.color,
+					"font-size": "2em"
+				}).text(this.name).appendTo(this.el);
+			}else{
+				//You can decide not to render a UI or you can use the options to render a UI yourself...
+				this.options.renderUIFunc(this.options);
+			}
+
+		},
+
+		calcPosition: function(id, players, hand){
+			if(players < 4){
+				if(players > 2){
+					switch(id){
+						case 0:
+						// bottom of table
+						break;
+						case 1:
+						// left of table
+						break;
+						case 2:
+						// top of table
+						break;
+						case 3:
+						// right of table
+						break;
+					}
+				}else{
+					if(id === 0){
+						// bottom of table
+						this.options.right = 0;
+						this.options.bottom = 0;
+					}else{
+						// top of table
+						this.options.left = 0;
+						this.options.top = 0;
+					}
+				}
+			}else{ // Game has 5-many players
+
+			}
 		}
 	}
 
@@ -173,8 +289,10 @@ var gametypes = (function(){
 				left:"10px",
 				right: "auto",
 				bottom: "10px",
+				maximized: true,
 				callback: null,
-				chatCallback: null //Overriding the chat callback will require you to send the message yourself!
+				chatCallback: null, //Overriding the chat callback will require you to send the message yourself!
+				toolbarCallback: null
 			}
 
 			if (options) {
@@ -208,6 +326,13 @@ var gametypes = (function(){
 
 
 			this.input = this.createChatInput(this.options.chatCallback, speed);
+			this.toolbar = this.createToolbar(this.options.toolbarCallback, speed);
+
+			if(this.options.maximized){
+				this.maximize();
+			}else{
+				this.minimize();
+			}
 
 			if (this.options.callback) {
 				setTimeout(this.options.chatCallback, speed);
@@ -220,20 +345,76 @@ var gametypes = (function(){
 			return new ChatInput(callback, speed);
 		},
 
-		sendMessage(message, senderName, options){
+		createToolbar: function(callback, speed){
+			return new ChatToolBar(this, this.toolbarCallback, speed);
+		},
+
+		sendMessage: function(message, senderName, options){
 			this.input.sendMessage(message, senderName, options);
+		},
+
+		maximize: function(){
+			this.input.show();
+			this.el.height(this.options.height);
+			this.el.show();
+			this.toolbar.maximize();
+		},
+
+		minimize: function(){
+			this.input.hide();
+			this.el.height(this.toolbar.size);
+			this.toolbar.minimize();
+		},
+
+		close: function(){
+			this.el.hide();
+		},
+
+		show: function(){
+			this.el.show();
+		},
+
+		toolbarCallback: function(caller, actiontype){
+			if(caller.options.toolbarCallback){
+				caller.options.toolbarCallback(actiontype);
+			}else{
+				switch(actiontype){
+					case ChatBoxAction.CLOSE:
+						caller.close();
+					break;
+					case ChatBoxAction.MINIMIZE:
+						caller.minimize();
+					break;
+					case ChatBoxAction.MAXIMIZE:
+						caller.maximize();
+					break;
+				}
+			}
 		}
 
 	}
 
-	function ChatInput(callback, speed){
-		this.init(callback, speed);
+	function ChatInput(callback, speed, colors){
+		this.init(callback, speed, colors);
 	}
 
 	ChatInput.prototype = {
-		init: function(callback, speed){
+		init: function(callback, speed, colors){
 			this.callback = callback;
 			this.speed = speed;
+
+
+			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
+				this.primaryColor = colors[0];
+				this.secondaryColor = colors[1];
+				this.primaryTextColor = colors[2];
+				this.secondaryTextColor = colors[3];
+			}else{
+				this.primaryTextColor = "white";
+				this.secondaryTextColor = "white";
+				this.primaryColor = "#2196F3";
+				this.secondaryColor = "#3f51b5";
+			}
 
 			this.render();
 		},
@@ -267,8 +448,8 @@ var gametypes = (function(){
 				bottom: "0px",
 				right: 0,
 				text:">",
-				color:"white",
-				"background-color": "#2196F3",
+				color: this.primaryTextColor,
+				"background-color": this.primaryColor,
 				cursor: "pointer"
 			};
 			var defChatAreaCSS = {
@@ -277,7 +458,7 @@ var gametypes = (function(){
 				width:'100%',
 				height: ($('#pcjs_chatbox').height() - 20) + "px",
 				left: 0,
-				top: 0,
+				top: "15px",
 				"overflow-y":"scroll"
 			};
 
@@ -287,7 +468,6 @@ var gametypes = (function(){
 
 			//ETC styling for chatInput
 			this.chatInput.focus(function() {
-				//Add temp css on focus I guess...
 				$(this).css({
 					color:"black"
 				});
@@ -307,7 +487,8 @@ var gametypes = (function(){
 				function() {
 				//apply temp css
 				$(this).css({
-					"background-color":"#3f51b5"
+					"background-color":me.secondaryColor,
+					"color": me.secondaryTextColor
 				})
 				},
 				function(){
@@ -325,12 +506,24 @@ var gametypes = (function(){
 			message = this.chatInput.val();
 
 			if(callback){
-				callback(message);
+				callback(ChatBoxAction.SEND, message);
 			}else{
 				this.sendMessage(message);
 			}
 
 			this.chatInput.val("");
+		},
+
+		hide: function(){
+			this.chatInput.hide();
+			this.chatButtonSend.hide();
+			this.chatArea.hide();
+		},
+
+		show: function(){
+			this.chatInput.show();
+			this.chatButtonSend.show();
+			this.chatArea.show();
 		},
 
 		sendMessage: function(message, senderName, options){
@@ -375,6 +568,263 @@ var gametypes = (function(){
 		}
 	}
 
+	function ChatToolBar(caller, callback, speed, colors){
+		this.init(caller, callback, speed, colors);
+	}
+
+	ChatToolBar.prototype = {
+		init: function(caller, callback, speed, colors){
+			this.caller = caller;
+			this.callback = callback;
+			this.speed = speed;
+			this.size = 15;
+
+			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
+				this.primaryColor = colors[0];
+				this.secondaryColor = colors[1];
+				this.primaryTextColor = colors[2];
+				this.secondaryTextColor = colors[3];
+			}else{
+				this.primaryTextColor = "white";
+				this.secondaryTextColor = "white";
+				this.primaryColor = "#2196F3";
+				this.secondaryColor = "#3f51b5";
+			}
+
+			this.render();
+		},
+
+		render: function(){
+			var me = this;
+
+			var toolbarCSS = {
+				position: "absolute",
+				top: "0",
+				left: "0",
+				right: "auto",
+				bottom: "auto",
+				"background-color": this.primaryColor,
+				width:"100%",
+				height: this.size + "px"
+			};
+			var minimizeCSS = {
+				"background-color": this.primaryColor,
+				color: this.primaryTextColor,
+				float:"right",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer"				
+			};
+			var maximizeCSS = {
+				"background-color": this.primaryColor,
+				color: this.primaryTextColor,
+				float:"right",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer"				
+			};
+			var closeCSS = {
+				"background-color": "red",
+				color: this.primaryTextColor,
+				float:"right",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer"
+			};
+
+			this.toolbar = $("<div/>").css(toolbarCSS).addClass("pcjs_toolbar").data("toolbar", this).appendTo($("#pcjs_chatbox"));
+			this.close = $("<div/>").css(closeCSS).addClass("pcjs_toolbar_close").data("toolbar", this).text("x").appendTo(this.toolbar);
+			this.maximizeDiv = $("<div/>").css(maximizeCSS).addClass("pcjs_toolbar_maximize").data("toolbar", this).text("+").appendTo(this.toolbar);
+			this.minimizeDiv = $("<div/>").css(minimizeCSS).addClass("pcjs_toolbar_minimize").data("toolbar", this).text("-").appendTo(this.toolbar);
+
+			this.close.hover(
+				function(){
+					$(this).css({
+						"background-color": "darkred"
+					})
+				}, 
+				function(){
+					$(this).css(closeCSS);
+				}
+			);
+
+			this.maximizeDiv.hover(
+				function(){
+					$(this).css({
+						"background-color": me.secondaryColor,
+						color: me.secondaryTextColor
+					});
+				},
+				function(){
+					$(this).css(maximizeCSS);
+				}
+			);
+
+			this.minimizeDiv.hover(
+				function(){
+					$(this).css({
+						"background-color": me.secondaryColor,
+						color: me.secondaryTextColor
+					});
+				},
+				function(){
+					$(this).css(minimizeCSS);
+				}
+			);
+
+			this.close.click(function(){
+				if(me.callback){
+					me.callback(me.caller, ChatBoxAction.CLOSE);
+				}
+			});
+
+			this.maximizeDiv.click(function(){
+				if(me.callback){
+					me.callback(me.caller, ChatBoxAction.MAXIMIZE);
+				}
+			});
+
+			this.minimizeDiv.click(function(){
+				if(me.callback){
+					me.callback(me.caller, ChatBoxAction.MINIMIZE);
+				}
+			})
+
+
+		},
+
+		minimize: function(){
+			this.minimizeDiv.hide();
+			this.maximizeDiv.show();
+		},
+
+		maximize: function(){
+			this.maximizeDiv.hide();
+			this.minimizeDiv.show();
+		}
+	}
+
+	ChatBoxAction = {
+		CLOSE: 1,
+		MINIMIZE: 2,
+		MAXIMIZE: 3,
+		SEND: 4,
+		UPDATE: 5
+	}
+
+	function AI(hand, deck, pile, callback){
+		this.init(hand, deck, pile, callback);
+	}
+
+	AI.prototype = {
+		init: function(hand, deck, pile, callback){
+			this.hand = hand;
+			this.deck = deck;
+			this.pile = pile;
+			this.callback = callback;
+			this.name = this.generateAIName();
+		},
+
+		generateAIName: function(){
+			var nameResult = "";
+			switch(parseInt(Math.random()*10)){
+				case 0:
+					nameResult = "Tim";
+				break;
+				case 1:
+					nameResult = "Hugh";
+				break;
+				case 2:
+					nameResult = "Randy";
+				break;
+				case 3:
+					nameResult = "Elias";
+				break;
+				case 4:
+					nameResult = "Erik";
+				break;
+				case 5:
+					nameResult = "Kim";
+				break;
+				case 6:
+					nameResult = "Damon";
+				break;
+				case 7:
+					nameResult = "George";
+				break;
+				case 8:
+					nameResult = "Jodi";
+				break;
+				case 9:
+					nameResult = "Ruth";
+				break;
+				case 10:
+					nameResult = "Alex";
+				break;
+			}
+
+			return nameResult + " Bot";
+		},
+
+		getTaunt: function(){
+			switch(parseInt(Math.random()*3)){
+				case 0:
+					return "What were you thinking?";
+				break;
+				case 1:
+					return "You're going to regret that!";
+				break;
+				case 2:
+					return "You're making this too easy";
+				break;
+			}
+		},
+
+		getCompliment: function(){
+			switch(parseInt(Math.random()*3)){
+				case 0:
+					return "Great play!";
+				break;
+				case 1:
+					return "What a move!";
+				break;
+				case 2:
+					return "Nice one!";
+				break;
+			}
+		},
+
+		getGreeting: function(){
+			switch(parseInt(Math.random()*3)){
+				case 0:
+					return "Hello!";
+				break;
+				case 1:
+					return "Glad to see you!";
+				break;
+				case 2:
+					return "Let's do this!";
+				break;
+			}
+		},
+
+		sendMessage: function(message){
+			var chatbox = $("#pcjs_chatbox");
+			if(chatbox !== null && typeof chatbox !== "undefined"){
+				var obj = chatbox.data("chatbox");
+				if(obj !== null && typeof obj !== "undefined"){
+					obj.sendMessage(message, this.name);
+				}
+			}
+		}
+	}
+
 
 	return {
 		init: init,
@@ -382,7 +832,8 @@ var gametypes = (function(){
 		GameType: GameType,
 		Player: Player,
 		GameMaster: GameMaster,
-		ChatBox: ChatBox
+		ChatBox: ChatBox,
+		ChatBoxAction: ChatBoxAction
 	};
 
 })();
