@@ -32,7 +32,7 @@ var gametypes = (function(){
 		}
 	}
 
-	function init(cards, players, options, buildDeckFunction) {
+	function init(cards, options, buildDeckFunction) {
 		if (options) {
 			for (var i in options) {
 				if (opt.hasOwnProperty(i)) {
