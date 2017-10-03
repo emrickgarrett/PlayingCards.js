@@ -159,14 +159,14 @@ var gametypes = (function(){
 				}
 			}
 
-			if(this.options.displayUI){
-				this.renderUI();
-			}
-
 			if(this.options.AI){
 				this.AI = new AI(hand, deck, pile);
-				this.name = this.AI.name;
+				this.name = (this.name === null || typeof this.name === "undefined" || this.name === "") ? this.AI.name: this.name;
 				this.AI.sendMessage(this.AI.getGreeting());
+			}
+
+			if(this.options.displayUI){
+				this.renderUI();
 			}
 
 		},
