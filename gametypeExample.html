@@ -145,10 +145,10 @@
 
 	var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'175px', chatCallback: function(type, message){
 			//Since we override the chatCallback we can add on to the message, but must call the sendMessage functionality for it to actually send.
-			//We could also override the name for the message sender (atm is randomly generates a name) by using:
-			//chatBox.sendMessage(message, name);
+			//We could also generate a name by using:
+			//chatBox.sendMessage(message);
 			if(type === ChatBoxAction.SEND){
-				chatBox.sendMessage(message);
+				chatBox.sendMessage(message, examplePlayer.name);
 			}
 		}, toolbarCallback: function(type){
 			if(type === ChatBoxAction.CLOSE){
@@ -165,7 +165,7 @@
 	
 	chatBox.render();
 	chatBox.close();
-	
+
 	$("#chat").click(function(){
 		$("#chat").hide();
 		chatBox.show();
