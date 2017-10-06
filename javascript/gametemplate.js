@@ -376,10 +376,12 @@ var gametypes = (function(){
 
 		close: function(){
 			this.el.hide();
+			this.toolbar.hide();
 		},
 
 		show: function(){
 			this.el.show();
+			this.toolbar.show();
 		},
 
 		toolbarCallback: function(caller, actiontype){
@@ -586,6 +588,8 @@ var gametypes = (function(){
 			this.callback = callback;
 			this.speed = speed;
 			this.size = 15;
+			this.alertVal = 0;
+			this.isActive = false;
 
 			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
 				this.primaryColor = colors[0];
@@ -645,11 +649,24 @@ var gametypes = (function(){
 				"text-align": "center",
 				cursor: "pointer"
 			};
+			this.alertCSS = {
+				"background-color": this.primaryColor,
+				color: this.primaryTextColor,
+				float:"left",
+				width: this.size + "px",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				"text-align": "center",
+				cursor: "pointer",
+				"border-radius": Math.round(this.size) + "px"
+			}
 
 			this.toolbar = $("<div/>").css(toolbarCSS).addClass("pcjs_toolbar").data("toolbar", this).appendTo($("#pcjs_chatbox"));
 			this.close = $("<div/>").css(closeCSS).addClass("pcjs_toolbar_close").data("toolbar", this).text("x").appendTo(this.toolbar);
 			this.maximizeDiv = $("<div/>").css(maximizeCSS).addClass("pcjs_toolbar_maximize").data("toolbar", this).text("+").appendTo(this.toolbar);
 			this.minimizeDiv = $("<div/>").css(minimizeCSS).addClass("pcjs_toolbar_minimize").data("toolbar", this).text("-").appendTo(this.toolbar);
+			this.alertDiv = $("<div/>").css(this.alertCSS).addClass("pcjs_toolbar_alert").data("toolbar", this).text("0").appendTo(this.toolbar);
+			this.alertDiv.hide();
 
 			this.close.hover(
 				function(){
@@ -710,11 +727,58 @@ var gametypes = (function(){
 		minimize: function(){
 			this.minimizeDiv.hide();
 			this.maximizeDiv.show();
+			this.isActive = false;
 		},
 
 		maximize: function(){
 			this.maximizeDiv.hide();
 			this.minimizeDiv.show();
+			this.isActive = true;
+			this.clearAlert();
+		},
+
+		incrementAlert: function(){
+			this.alertVal++;
+			this.refreshAlerts();
+		},
+
+		decrementAlert: function(){
+			this.alertVal--;
+			this.refreshAlerts();
+		},
+
+		updateAlert: function(newVal){
+			this.alertVal = newVal;
+			this.refreshAlerts();
+		},
+
+		clearAlert: function(){
+			this.alertVal = 0;
+			this.refreshAlerts();
+		},
+
+		refreshAlerts: function(){
+			if(this.alertVal >= 1){
+				this.alertDiv.css({
+					backgroundColor: "white",
+					color: "red"
+				});
+				this.alertDiv.show();
+			}else{
+				//set css to default val
+				this.alertDiv.css(this.alertCSS);
+				this.alertDiv.hide();
+			}
+			this.alertDiv.innerHTML = "<span/>" + this.alertVal + "</span>";
+		},
+
+		show: function(){
+			this.isActive = true;
+			this.clearAlert();
+		},
+
+		hide: function(){
+			this.isActive = false;
 		}
 	}
 
@@ -846,6 +910,9 @@ var gametypes = (function(){
 				var obj = chatbox.data("chatbox");
 				if(obj !== null && typeof obj !== "undefined"){
 					obj.sendMessage(message, this.name);
+					if(obj.toolbar.isActive === false){
+						obj.toolbar.incrementAlert();
+					}
 				}
 			}
 		}
