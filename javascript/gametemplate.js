@@ -328,6 +328,7 @@ var gametypes = (function(){
 					left: this.options.left,
 					right: this.options.right,
 					bottom: this.options.bottom,
+					"z-index": 10000,
 					"text-align": "left"
 			}).attr('id', 'pcjs_chatbox').data('chatbox', this).appendTo($(this.options.table));
 
