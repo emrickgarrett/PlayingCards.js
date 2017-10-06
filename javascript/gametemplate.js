@@ -3,7 +3,7 @@ var gametypes = (function(){
 	var opt = {
 				table: 'body',
 				handSize: 5,
-				players: 4,
+				players: 2,
 				teams: false,
 				defaultFaceDown: true,
 				cardCount: 52,
@@ -130,7 +130,6 @@ var gametypes = (function(){
 			this.pile = pile;
 			
 			this.options = {
-				players: 2,
 				displayUI: true,
 				width: "auto",
 				height: "auto",
@@ -150,7 +149,7 @@ var gametypes = (function(){
 				name: null
 			};
 
-			this.calcPosition(id, this.options.players, hand);			
+			this.calcPosition(id, opt.players, hand);			
 
 			if (options) {
 				for (var i in options) {
@@ -218,20 +217,28 @@ var gametypes = (function(){
 		},
 
 		calcPosition: function(id, players, hand){
-			if(players < 4){
+			if(players < 5){
 				if(players > 2){
 					switch(id){
 						case 0:
 						// bottom of table
+							this.options.right = "5%";
+							this.options.bottom = 0;
 						break;
 						case 1:
 						// left of table
+							this.options.left = 0;
+							this.options.bottom = "5%";
 						break;
 						case 2:
 						// top of table
+							this.options.left = "5%";
+							this.options.top = 0;
 						break;
 						case 3:
 						// right of table
+							this.options.top = "5%";
+							this.options.right = 0;
 						break;
 					}
 				}else{
@@ -246,7 +253,7 @@ var gametypes = (function(){
 					}
 				}
 			}else{ // Game has 5-many players
-
+				notImplementedError(calcPosition, this);
 			}
 		}
 	}
@@ -773,7 +780,7 @@ var gametypes = (function(){
 		},
 
 		getTaunt: function(){
-			switch(parseInt(Math.random()*3)){
+			switch(parseInt(Math.random()*5)){
 				case 0:
 					return "What were you thinking?";
 				break;
@@ -783,11 +790,17 @@ var gametypes = (function(){
 				case 2:
 					return "You're making this too easy";
 				break;
+				case 3:
+					return "Uh... was that a mistake?";
+				break;
+				case 4:
+					return "GG no RE";
+				break;
 			}
 		},
 
 		getCompliment: function(){
-			switch(parseInt(Math.random()*3)){
+			switch(parseInt(Math.random()*5)){
 				case 0:
 					return "Great play!";
 				break;
@@ -797,11 +810,17 @@ var gametypes = (function(){
 				case 2:
 					return "Nice one!";
 				break;
+				case 3:
+					return "Wow!";
+				break;
+				case 4:
+					return "What a play!";
+				break;
 			}
 		},
 
 		getGreeting: function(){
-			switch(parseInt(Math.random()*3)){
+			switch(parseInt(Math.random()*5)){
 				case 0:
 					return "Hello!";
 				break;
@@ -810,6 +829,12 @@ var gametypes = (function(){
 				break;
 				case 2:
 					return "Let's do this!";
+				break;
+				case 3: 
+					return "Wasssssup";
+				break;
+				case 4:
+					return "Leggo";
 				break;
 			}
 		},

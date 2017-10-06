@@ -103,6 +103,8 @@ var cards = (function(){
 			this.rank = rank;
 			this.name = suit.toUpperCase() + rank;
 			this.faceUp = false;
+			this.shouldRotate  = false;
+			this.angle = 0;
 			this.table = table;
 			if(!shouldNotAttach || shouldNotAttach === null || shouldNotAttach === 'undefined'){
 				this.attach(table);
@@ -164,7 +166,6 @@ var cards = (function(){
 
 			xpos = -rank * opt.cardSize.width;
 			ypos = -offsets[this.suit] * opt.cardSize.height;
-			this.rotate(0);
 			$(this.el).css('background-image', 'url(' + this.getCardImageURL() + ')');
 
 			return this;
@@ -173,7 +174,6 @@ var cards = (function(){
 		hideCard: function(position) {
 			//var y = opt.cardback == 'red' ? 0*opt.cardSize.height : -1*opt.cardSize.height;
 			$(this.el).css('background-image', 'url(' + this.getCardImageBackgroundURL() + ')');
-			this.rotate(0);
 
 			return this;
 		},
@@ -238,6 +238,7 @@ var cards = (function(){
 				}
 				this.push(card);
 				card.container = this;
+				card.rotate(0);
 			}
 		},
 
@@ -256,6 +257,8 @@ var cards = (function(){
 			options = options || {};
 			this.x = options.x || $(opt.table).width()/2;
 			this.y = options.y || $(opt.table).height()/2;
+			this.shouldRotate = options.shouldRotate;
+			this.angle = options.angle || 0;
 			this.faceUp = options.faceUp;
 		},
 
@@ -380,6 +383,7 @@ var cards = (function(){
 	Hand.prototype.extend({
 		calcPosition: function(options){
 			options = options || {};
+
 			var width = opt.cardSize.width + (this.length-1) * opt.cardSize.padding;
 			var left = Math.round(this.x - width/2);
 			var top = Math.round(this.y-opt.cardSize.height/2, 0);
@@ -387,6 +391,18 @@ var cards = (function(){
 			for (var i = 0; i < this.length; i++){
 				this[i].targetTop = top;
 				this[i].targetLeft = left+i*opt.cardSize.padding;
+
+				if(this.shouldRotate && this.angle == 90){
+					this[i].targetTop = top+i*opt.cardSize.padding - opt.cardSize.height/2;
+					this[i].targetLeft = this.x;
+					this[i].rotate(this.angle);
+				}else if(this.shouldRotate && this.angle == 270){
+					this[i].targetTop = top-i*opt.cardSize.padding + opt.cardSize.height/2;
+					this[i].targetLeft = this.x - opt.cardSize.height;
+					this[i].rotate(this.angle);
+				}else if(this.shouldRotate){
+					//not implemented... I would have to reconsider math for general cases...
+				}
 			}
 		},
 
