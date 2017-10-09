@@ -819,12 +819,15 @@ var gametypes = (function(){
 							top: py + "px"
 						});
 					}
+
+					chatbox.css({cursor: "move"})
 				});
 
 				$(document).mouseup(function(){
 					me.mouseHasBeenUp = true;
 					$(document).unbind("mousemove");
 					$(document).unbind("mouseup");
+					chatbox.css({cursor: "default"})
 				});		
 			});			
 		}
