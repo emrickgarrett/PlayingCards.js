@@ -590,6 +590,7 @@ var gametypes = (function(){
 			this.size = 15;
 			this.alertVal = 0;
 			this.isActive = false;
+			this.isDraggable = true;
 
 			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
 				this.primaryColor = colors[0];
@@ -667,6 +668,10 @@ var gametypes = (function(){
 			this.minimizeDiv = $("<div/>").css(minimizeCSS).addClass("pcjs_toolbar_minimize").data("toolbar", this).text("-").appendTo(this.toolbar);
 			this.alertDiv = $("<div/>").css(this.alertCSS).addClass("pcjs_toolbar_alert").data("toolbar", this).text("0").appendTo(this.toolbar);
 			this.alertDiv.hide();
+
+			if(this.isDraggable){
+				this.setupDraggable();
+			}
 
 			this.close.hover(
 				function(){
@@ -779,6 +784,49 @@ var gametypes = (function(){
 
 		hide: function(){
 			this.isActive = false;
+		},
+
+		setupDraggable: function(){
+			this.toolbar.mousedown(function(ev){
+				this.startMouseDown = true;
+
+				var chatbox = $("#pcjs_chatbox");
+				var startingX = ev.pageX - chatbox.offset().left;
+				var startingY = ev.pageY - chatbox.offset().top;
+				var me = this;
+				this.mouseHasBeenUp = this.mouseHasBeenUp || false;
+
+				$(document).mousemove(function(ev){
+					var px = ev.pageX - startingX;
+					var py = ev.pageY - startingY;
+
+					if($("body").children("#pcjs_chatbox").length === 0 || !me.mouseHasBeenUp){
+						var realX = ev.pageX - (chatbox.position().left - chatbox.offset().left) - startingX;
+						var realY = ev.pageY - (chatbox.position().top - chatbox.offset().top) - startingY;
+
+						if($("body").children("#pcjs_chatbox").length === 0){
+							chatbox.appendTo("body");
+						}
+
+						chatbox.css({
+							left: realX + "px",
+							top: realY + "px"
+						});
+
+					}else{
+						chatbox.css({
+							left: px + "px",
+							top: py + "px"
+						});
+					}
+				});
+
+				$(document).mouseup(function(){
+					me.mouseHasBeenUp = true;
+					$(document).unbind("mousemove");
+					$(document).unbind("mouseup");
+				});		
+			});			
 		}
 	}
 
