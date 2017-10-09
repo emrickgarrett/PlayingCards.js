@@ -584,6 +584,30 @@ var gametypes = (function(){
 				"padding-left": "3px",
 				"padding-right": "3px"
 			}
+			var channelDropdownCSS = {
+				"background-color": "white",
+				color: "black",
+				position:"absolute",
+				display:"none",
+				"min-width": "100px",
+				"box-shadow": "0px 8px 16px 0px rgba(0,0,0,0.2)",
+				"z-index": 1,
+				"left": 0,
+				"top": "15px"
+			}
+			var channelDropdownItemCSS = {
+				color: "black",
+				padding: "4px 8px",
+				display: "block",
+				cursor: "pointer",
+				background: "white"
+			}
+
+			var channelDropdownItemHoverCSS = {
+				color: "white",
+				"background-color": this.secondaryColor
+				
+			}
 
 
 			this.toolbar = $("<div/>").css(toolbarCSS).addClass("pcjs_toolbar").data("toolbar", this).appendTo($("#pcjs_chatbox"));
@@ -594,7 +618,7 @@ var gametypes = (function(){
 			this.alertDiv.hide();
 
 			if(this.caller.options.hasChannels){
-				this.setupChannels(channelCSS, this.caller.options.channels);
+				this.setupChannels(channelCSS, channelDropdownCSS, channelDropdownItemCSS, channelDropdownItemHoverCSS);
 			}
 
 			if(this.caller.options.isDraggable){
@@ -761,9 +785,12 @@ var gametypes = (function(){
 			});			
 		},
 
-		setupChannels: function(channelCSS){
+		setupChannels: function(channelCSS, channelDropdownCSS, channelDropdownItemCSS, channelDropdownItemHoverCSS){
 			this.channelDiv = $("<div/>").css(channelCSS).addClass("pcjs_toolbar_channel").data("toolbar", this).text(this.caller.options.channels[0]).appendTo(this.toolbar);	
 			
+			this.channelSelDiv = $("<div/>").css(channelDropdownCSS).addClass("pcjs_toolbar_channel_select").data("channels", this.caller.options.channels).appendTo(this.toolbar);
+			this.createChannelList(channelDropdownItemCSS, channelDropdownItemHoverCSS, this.channelSelDiv);
+
 			var me = this;
 			this.channelDiv.hover(
 				function(){
@@ -777,9 +804,46 @@ var gametypes = (function(){
 				});
 
 			this.channelDiv.click(function(){
-				console.log("Change Channel");
-				//Need to create window with Absolute positioning on mouse x/y that will let them pick a channel from the list...
+				if(!me.channelSelDiv.is(":hidden")){
+					me.channelSelDiv.hide();
+				}else{
+					me.channelSelDiv.show();
+				}
 			});
+
+			$(document).click(function(ev){
+				if(!ev.target.matches(".pcjs_toolbar_channel_select") && !ev.target.matches(".pcjs_toolbar_channel")){
+					me.channelSelDiv.hide();
+				}
+			});
+		},
+
+		createChannelList: function(channelCSS, channelHoverCSS, channelSelDiv){
+			var me = this;
+
+			for(index in this.caller.options.channels){
+				var channel = this.caller.options.channels[index];
+				let data = index;
+				
+				var item = $("<span/>").css(channelCSS)
+							.addClass("pcjs_toolbar_channel_select_item")
+							.data("channel", index)
+							.text(channel)
+							.appendTo(channelSelDiv);
+				
+				item.click(function(){
+					me.caller.switchChannel(data);
+					channelSelDiv.hide();
+				});
+
+				item.hover(
+					function(){
+						$(this).css(channelHoverCSS);
+					},
+					function(){
+						$(this).css(channelCSS);
+					})
+			}
 		},
 
 		switchChannel: function(channelId){
