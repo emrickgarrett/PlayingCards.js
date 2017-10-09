@@ -167,6 +167,7 @@ var gametypes = (function(){
 				chatCallback: null, //Overriding the chat callback will require you to send the message yourself!
 				toolbarCallback: null
 			}
+			this.activeChannel = 0;
 
 			if (options) {
 				for (var i in options) {
@@ -177,7 +178,7 @@ var gametypes = (function(){
 			}
 			if(this.options.channels.length > 1){
 				this.options.hasChannels = true;
-			}
+			} 
 		},
 
 		toString: function(){
@@ -203,7 +204,7 @@ var gametypes = (function(){
 
 
 			this.input = this.createChatInput(this.options.chatCallback, speed);
-			this.toolbar = this.createToolbar(this.options.toolbarCallback, speed);
+			this.toolbar = this.createToolbar(this.toolbarCallback, speed);
 
 			if(this.options.maximized){
 				this.maximize();
@@ -275,6 +276,7 @@ var gametypes = (function(){
 			if(this.options.hasChannels){
 				this.toolbar.switchChannel(channelId);
 				this.input.switchChannel(channelId);
+				this.activeChannel = channelId;
 			}
 		}
 
@@ -416,13 +418,15 @@ var gametypes = (function(){
 		hide: function(){
 			this.chatInput.hide();
 			this.chatButtonSend.hide();
-			this.chatArea.hide();
+			
+			this.getChannel(this.caller.activeChannel).hide();
 		},
 
 		show: function(){
 			this.chatInput.show();
 			this.chatButtonSend.show();
-			this.chatArea.show();
+			
+			this.getChannel(this.caller.activeChannel).show();
 		},
 
 		sendMessage: function(message, senderName, t_options){
@@ -451,7 +455,6 @@ var gametypes = (function(){
 
 			var sender = senderName || this.generatedUserName();
 			var channel = this.getChannel(options.channel);
-			console.log(channel);
 
 			var builtMessage = $("<span/>").css(options.nameCSS).html(sender).prop('outerHTML') + " : " + message;
 
@@ -472,10 +475,8 @@ var gametypes = (function(){
 			for(index in this.caller.options.channels){
 				if(index != channelId){
 					this.channels[index].hide();
-					console.log("Hide! Index: " + index + ", ChannelId: " + channelId);
 				}else{
 					this.channels[index].show();
-					console.log("Show! Index: " + index + ", ChannelId: " + channelId);	
 				}
 			}
 		},
