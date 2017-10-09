@@ -160,6 +160,8 @@ var gametypes = (function(){
 				left:"10px",
 				right: "auto",
 				bottom: "10px",
+				channels: ["default"],
+				isDraggable: true,
 				maximized: true,
 				callback: null,
 				chatCallback: null, //Overriding the chat callback will require you to send the message yourself!
@@ -172,6 +174,9 @@ var gametypes = (function(){
 						this.options[i] = options[i];
 					}
 				}
+			}
+			if(this.options.channels.length > 1){
+				this.options.hasChannels = true;
 			}
 		},
 
@@ -214,11 +219,11 @@ var gametypes = (function(){
 		},
 
 		createChatInput: function(callback, speed){
-			return new ChatInput(callback, speed);
+			return new ChatInput(this, callback, speed);
 		},
 
 		createToolbar: function(callback, speed){
-			return new ChatToolBar(this, this.toolbarCallback, speed);
+			return new ChatToolBar(this, callback, speed);
 		},
 
 		sendMessage: function(message, senderName, options){
@@ -264,16 +269,24 @@ var gametypes = (function(){
 					break;
 				}
 			}
+		},
+
+		switchChannel: function(channelId){
+			if(this.options.hasChannels){
+				this.toolbar.switchChannel(channelId);
+				this.input.switchChannel(channelId);
+			}
 		}
 
 	}
 
-	function ChatInput(callback, speed, colors){
-		this.init(callback, speed, colors);
+	function ChatInput(caller, callback, speed, colors){
+		this.init(caller, callback, speed, colors);
 	}
 
 	ChatInput.prototype = {
-		init: function(callback, speed, colors){
+		init: function(caller, callback, speed, colors){
+			this.caller = caller;
 			this.callback = callback;
 			this.speed = speed;
 
@@ -297,7 +310,7 @@ var gametypes = (function(){
 			var me = this;
 			var inputIdName = "pcjs_chatInput";
 			var buttonIdName = "pcjs_chatboxSendButton";
-			var chatAreaIdName = "pcjs_chatArea";
+			this.chatAreaIdName = "pcjs_chatArea";
 			var defInputCSS = {
 				position:'absolute',
 				width: '80%',
@@ -326,7 +339,7 @@ var gametypes = (function(){
 				"background-color": this.primaryColor,
 				cursor: "pointer"
 			};
-			var defChatAreaCSS = {
+			this.defChatAreaCSS = {
 				position: 'absolute',
 				display: 'inline-block',
 				width:'100%',
@@ -336,7 +349,7 @@ var gametypes = (function(){
 				"overflow-y":"scroll"
 			};
 
-			this.chatArea = $("<div/>").css(defChatAreaCSS).attr("id", chatAreaIdName).data("chatArea", this).appendTo($('#pcjs_chatbox'));
+			this.chatArea = $("<div/>").css(this.defChatAreaCSS).attr("id", this.chatAreaIdName).data("chatArea", this).appendTo($('#pcjs_chatbox'));
 			this.chatInput = $('<input/>').css(defInputCSS).attr("id", inputIdName).data('input', this).appendTo($('#pcjs_chatbox'));
 			this.chatButtonSend = $('<input type=\'button\'/>').css(defButtonCSS).attr("id", buttonIdName).attr('value', '>').data('button', this).appendTo($('#pcjs_chatbox'));
 
@@ -373,6 +386,18 @@ var gametypes = (function(){
 			this.chatButtonSend.click(function(){
 				me.chatButtonClicked(me.callback);
 			});
+
+			if(this.caller.options.hasChannels){
+				//setup channels
+				this.channels = [];
+				this.chatArea.hide();//we won't be needing this ;)
+				for(index in this.caller.options.channels){
+					this.channels[index] = $("<div/>").css(this.defChatAreaCSS).attr("id", this.chatAreaIdName + "_" + this.caller.options.channels[index]).data("chatArea_channel-" + this.caller.options.channels[index], this).appendTo($('#pcjs_chatbox'));
+					if(index != 0){
+						this.channels[index].hide();
+					}
+				}
+			}
 		},
 
 		chatButtonClicked: function(callback){
@@ -400,7 +425,7 @@ var gametypes = (function(){
 			this.chatArea.show();
 		},
 
-		sendMessage: function(message, senderName, options){
+		sendMessage: function(message, senderName, t_options){
 			var defMessageCSS = {
 				left: 0,
 				display: "block",
@@ -411,28 +436,51 @@ var gametypes = (function(){
 				"font-weight": "bold"
 			}
 
-			var opt = options || {
+			var options = {
 				messageCSS: defMessageCSS,
-				nameCSS: nameCSS
+				nameCSS: nameCSS,
+				channel: 0
 			}
-			if (options) {
-				for (var i in options) {
-					if (this.options.hasOwnProperty(i)) {
-						this.options[i] = options[i];
+			if (t_options) {
+				for (var i in t_options) {
+					if (options.hasOwnProperty(i)) {
+						options[i] = t_options[i];
 					}
 				}
 			}
 
 			var sender = senderName || this.generatedUserName();
+			var channel = this.getChannel(options.channel);
+			console.log(channel);
 
-			var builtMessage = $("<span/>").css(nameCSS).html(sender).prop('outerHTML') + " : " + message;
+			var builtMessage = $("<span/>").css(options.nameCSS).html(sender).prop('outerHTML') + " : " + message;
 
-			$('<span/>').css(defMessageCSS).addClass("pcjs_chatMessage").data("message", builtMessage).appendTo(this.chatArea).html(builtMessage);
-			this.chatArea.scrollTop(function() { return this.scrollHeight;});
+			$('<span/>').css(options.messageCSS).addClass("pcjs_chatMessage").data("message", builtMessage).appendTo(channel).html(builtMessage);
+			channel.scrollTop(function() { return this.scrollHeight;});
 
 		},
 
-		generatedUserName(){
+		getChannel: function(index){
+			if(this.caller.options.hasChannels){
+				return this.channels[index];
+			}else{
+				return this.chatArea;
+			}
+		},
+
+		switchChannel: function(channelId){
+			for(index in this.caller.options.channels){
+				if(index != channelId){
+					this.channels[index].hide();
+					console.log("Hide! Index: " + index + ", ChannelId: " + channelId);
+				}else{
+					this.channels[index].show();
+					console.log("Show! Index: " + index + ", ChannelId: " + channelId);	
+				}
+			}
+		},
+
+		generatedUserName: function(){
 			if(this.generatedUserNameString){
 				return this.generatedUserNameString;
 			}else{
@@ -454,7 +502,6 @@ var gametypes = (function(){
 			this.size = 15;
 			this.alertVal = 0;
 			this.isActive = false;
-			this.isDraggable = true;
 
 			if(colors && colors !== null && typeof colors !== "undefined" && colors.count === 4) {
 				this.primaryColor = colors[0];
@@ -525,6 +572,18 @@ var gametypes = (function(){
 				cursor: "pointer",
 				"border-radius": Math.round(this.size) + "px"
 			}
+			var channelCSS = {
+				"background-color": this.primaryColor,
+				color: this.primaryTextColor,
+				float:"left",
+				width: "auto",
+				height: this.size + "px",
+				"line-height": this.size + "px",
+				cursor: "pointer",
+				"padding-left": "3px",
+				"padding-right": "3px"
+			}
+
 
 			this.toolbar = $("<div/>").css(toolbarCSS).addClass("pcjs_toolbar").data("toolbar", this).appendTo($("#pcjs_chatbox"));
 			this.close = $("<div/>").css(closeCSS).addClass("pcjs_toolbar_close").data("toolbar", this).text("x").appendTo(this.toolbar);
@@ -533,7 +592,11 @@ var gametypes = (function(){
 			this.alertDiv = $("<div/>").css(this.alertCSS).addClass("pcjs_toolbar_alert").data("toolbar", this).text("0").appendTo(this.toolbar);
 			this.alertDiv.hide();
 
-			if(this.isDraggable){
+			if(this.caller.options.hasChannels){
+				this.setupChannels(channelCSS, this.caller.options.channels);
+			}
+
+			if(this.caller.options.isDraggable){
 				this.setupDraggable();
 			}
 
@@ -695,6 +758,31 @@ var gametypes = (function(){
 					chatbox.css({cursor: "default"})
 				});		
 			});			
+		},
+
+		setupChannels: function(channelCSS){
+			this.channelDiv = $("<div/>").css(channelCSS).addClass("pcjs_toolbar_channel").data("toolbar", this).text(this.caller.options.channels[0]).appendTo(this.toolbar);	
+			
+			var me = this;
+			this.channelDiv.hover(
+				function(){
+					me.channelDiv.css({
+						"background-color":me.secondaryColor,
+						color: me.secondaryTextColor
+					});
+				},
+				function(){
+					me.channelDiv.css(channelCSS);
+				});
+
+			this.channelDiv.click(function(){
+				console.log("Change Channel");
+				//Need to create window with Absolute positioning on mouse x/y that will let them pick a channel from the list...
+			});
+		},
+
+		switchChannel: function(channelId){
+			this.channelDiv.text(this.caller.options.channels[channelId]);
 		}
 	}
 

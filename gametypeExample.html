@@ -139,7 +139,7 @@
 	});
 
 	//chatbox for bots to send feedback and potentially showing who's turn it is...
-	var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'175px', chatCallback: function(type, message){
+	var chatBox = new gametypes.ChatBox({table: '.table', width: '200px', height:'175px', channels: ["global", "whisper"], chatCallback: function(type, message){
 			//Since we override the chatCallback we can add on to the message, but must call the sendMessage functionality for it to actually send.
 			//We could also generate a name by using:
 			//chatBox.sendMessage(message);
@@ -160,6 +160,8 @@
 	}});
 	chatBox.render(); // if you don't render this before you create bots they can't send their greeting messages!
 	chatBox.close(); // hide the chatbox for now until the user clicks "Chat"
+	chatBox.sendMessage("Testing The Whisper Functionality", "Hidden User", {channel: 1});
+	chatBox.switchChannel(1);
 
 	//Puts functionality on the button to display the chat box (and temporarily hide the button!)
 	$("#chat").click(function(){
