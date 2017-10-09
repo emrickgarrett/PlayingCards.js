@@ -118,146 +118,6 @@ var gametypes = (function(){
 
 	}
 
-	function Player(id, hand, deck, pile, options){
-		this.init(id, hand, deck, pile, options);
-	}
-
-	Player.prototype = {
-		init: function(id, hand, deck, pile, options){
-			this.id = id;
-			this.hand = hand;
-			this.deck = deck;
-			this.pile = pile;
-			
-			this.options = {
-				displayUI: true,
-				width: "auto",
-				height: "auto",
-				border: "none",
-				padding: "5px",
-				position: "absolute",
-				top: "auto",
-				left: "auto",
-				right: "auto",
-				bottom: "auto",
-				backgroundColor: "auto",
-				color: "white",
-				textAlign: "left",
-				renderUIFunc: null,
-				AI: true,
-				sendGreeting: true,
-				name: null
-			};
-
-			this.calcPosition(id, opt.players, hand);			
-
-			if (options) {
-				for (var i in options) {
-					if (this.options.hasOwnProperty(i)) {
-						this.options[i] = options[i];
-					}
-				}
-			}
-
-			if(this.options.AI){
-				this.AI = new AI(hand, deck, pile);
-			}
-
-			if(this.options.name === null || typeof this.options.name === "undefined"){
-				if(this.options.AI){
-					this.name = this.AI.name;
-				}else{
-					this.name = generatedUserName();
-				}
-			}else{
-				this.name = this.options.name;
-			}
-
-			if(this.options.displayUI){
-				this.renderUI();
-			}
-
-			if(this.options.sendGreeting && this.options.AI){
-				this.AI.sendMessage(this.AI.getGreeting());									
-			}
-
-		},
-
-		toString: function(){
-			return "Name: " + this.name + ", id: " + this.id;
-		},
-
-		renderUI: function(){
-			if(typeof this.options.renderUIFunc === "undefined" || this.options.renderUIFunc === null){
-				this.el = $('<div/>').css({
-					width:this.options.width,
-					height:this.options.height,
-					position:this.options.position,
-					border:this.options.border,
-					"background-color": this.options.backgroundColor,
-					color: this.options.color,
-					top: this.options.top,
-					left: this.options.left,
-					right: this.options.right,
-					bottom: this.options.bottom,
-					padding: this.options.padding,
-					"text-align": this.options.textAlign
-				}).attr('id', 'player' + this.id + 'ui').data('player', this).appendTo($(opt.table)); 
-
-				this.nameEl = $('<span/>').css({
-					"font-weight": "bold",
-					color : this.options.color,
-					"font-size": "2em"
-				}).text(this.name).appendTo(this.el);
-			}else{
-				//You can decide not to render a UI or you can use the options to render a UI yourself...
-				this.options.renderUIFunc(this.options);
-			}
-
-		},
-
-		calcPosition: function(id, players, hand){
-			if(players < 5){
-				if(players > 2){
-					switch(id){
-						case 0:
-						// bottom of table
-							this.options.right = "5%";
-							this.options.bottom = 0;
-						break;
-						case 1:
-						// left of table
-							this.options.left = 0;
-							this.options.bottom = "5%";
-						break;
-						case 2:
-						// top of table
-							this.options.left = "5%";
-							this.options.top = 0;
-						break;
-						case 3:
-						// right of table
-							this.options.top = "5%";
-							this.options.right = 0;
-						break;
-					}
-				}else{
-					if(id === 0){
-						// bottom of table
-						this.options.right = 0;
-						this.options.bottom = 0;
-					}else{
-						// top of table
-						this.options.left = 0;
-						this.options.top = 0;
-					}
-				}
-			}else{ // Game has 5-many players
-				notImplementedError(calcPosition, this);
-			}
-		}
-	}
-
 	function GameMaster(cards, gametype, players, options){
 		this.init(cards, gametype, players, options);
 	}
@@ -276,7 +136,11 @@ var gametypes = (function(){
 
 		run: function(){
 			//do work
-			notImplementedError("run", this);
+			for(index in this.players){
+				this.players[index].beginPhase(this.players[index].turnOptions);
+				this.players[index].playPhase(this.players[index].turnOptions);
+				this.players[index].endPhase(this.players[index].turnOptions);
+			}
 		}
 	}
 	
@@ -797,7 +661,7 @@ var gametypes = (function(){
 				this.mouseHasBeenUp = this.mouseHasBeenUp || false;
 
 				chatbox.css({cursor: "move"})
-				
+
 				$(document).mousemove(function(ev){
 					var px = ev.pageX - startingX;
 					var py = ev.pageY - startingY;
@@ -840,6 +704,160 @@ var gametypes = (function(){
 		MAXIMIZE: 3,
 		SEND: 4,
 		UPDATE: 5
+	}
+
+	function Player(id, hand, deck, pile, options){
+		this.init(id, hand, deck, pile, options);
+	}
+
+	Player.prototype = {
+		init: function(id, hand, deck, pile, options){
+			this.id = id;
+			this.hand = hand;
+			this.deck = deck;
+			this.pile = pile;
+			
+			this.options = {
+				displayUI: true,
+				width: "auto",
+				height: "auto",
+				border: "none",
+				padding: "5px",
+				position: "absolute",
+				top: "auto",
+				left: "auto",
+				right: "auto",
+				bottom: "auto",
+				backgroundColor: "auto",
+				color: "white",
+				textAlign: "left",
+				renderUIFunc: null,
+				AI: true,
+				sendGreeting: true,
+				name: null
+			};
+
+			this.calcPosition(id, opt.players, hand);			
+
+			if (options) {
+				for (var i in options) {
+					if (this.options.hasOwnProperty(i)) {
+						this.options[i] = options[i];
+					}
+				}
+			}
+
+			if(this.options.AI){
+				this.AI = new AI(hand, deck, pile);
+			}
+
+			if(this.options.name === null || typeof this.options.name === "undefined"){
+				if(this.options.AI){
+					this.name = this.AI.name;
+				}else{
+					this.name = generatedUserName();
+				}
+			}else{
+				this.name = this.options.name;
+			}
+
+			if(this.options.displayUI){
+				this.renderUI();
+			}
+
+			if(this.options.sendGreeting && this.options.AI){
+				this.AI.sendMessage(this.AI.getGreeting());									
+			}
+
+		},
+
+		toString: function(){
+			return "Name: " + this.name + ", id: " + this.id;
+		},
+
+		renderUI: function(){
+			if(typeof this.options.renderUIFunc === "undefined" || this.options.renderUIFunc === null){
+				this.el = $('<div/>').css({
+					width:this.options.width,
+					height:this.options.height,
+					position:this.options.position,
+					border:this.options.border,
+					"background-color": this.options.backgroundColor,
+					color: this.options.color,
+					top: this.options.top,
+					left: this.options.left,
+					right: this.options.right,
+					bottom: this.options.bottom,
+					padding: this.options.padding,
+					"text-align": this.options.textAlign
+				}).attr('id', 'player' + this.id + 'ui').data('player', this).appendTo($(opt.table)); 
+
+				this.nameEl = $('<span/>').css({
+					"font-weight": "bold",
+					color : this.options.color,
+					"font-size": "2em"
+				}).text(this.name).appendTo(this.el);
+			}else{
+				//You can decide not to render a UI or you can use the options to render a UI yourself...
+				this.options.renderUIFunc(this.options);
+			}
+
+		},
+
+		calcPosition: function(id, players, hand){
+			if(players < 5){
+				if(players > 2){
+					switch(id){
+						case 0:
+						// bottom of table
+							this.options.right = "5%";
+							this.options.bottom = 0;
+						break;
+						case 1:
+						// left of table
+							this.options.left = 0;
+							this.options.bottom = "5%";
+						break;
+						case 2:
+						// top of table
+							this.options.left = "5%";
+							this.options.top = 0;
+						break;
+						case 3:
+						// right of table
+							this.options.top = "5%";
+							this.options.right = 0;
+						break;
+					}
+				}else{
+					if(id === 0){
+						// bottom of table
+						this.options.right = 0;
+						this.options.bottom = 0;
+					}else{
+						// top of table
+						this.options.left = 0;
+						this.options.top = 0;
+					}
+				}
+			}else{ // Game has 5-many players
+				notImplementedError(calcPosition, this);
+			}
+		},
+
+		//functions the implementer will need to override
+		//GameMaster will rely on these three methods for bots as well as the players.
+		beginPhase: function(options){
+			notImplementedError("beginPhase", this);
+		},
+
+		playPhase: function(options){
+			notImplementedError("playPhase", this);
+		},
+
+		endPhase: function(options){
+			notImplementedError("endPhase", this);
+		}
 	}
 
 	function AI(hand, deck, pile, callback){
@@ -967,6 +985,20 @@ var gametypes = (function(){
 					}
 				}
 			}
+		},
+
+		//functions the implementer will need to override
+		//GameMaster will rely on these three methods for bots as well as the players.
+		beginPhase: function(options){
+			notImplementedError("beginPhase", this);
+		},
+
+		playPhase: function(options){
+			notImplementedError("playPhase", this);
+		},
+
+		endPhase: function(options){
+			notImplementedError("endPhase", this);
 		}
 	}
 

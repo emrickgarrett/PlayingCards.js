@@ -173,7 +173,7 @@
 	var examplePlayer2 = new gametypes.Player(1, lefthand, deck, discardPile, {table: '.table'}); //If no name is passed it will generate one
 	var examplePlayer3 = new gametypes.Player(2, upperhand, deck, discardPile, {table: '.table'});
 	var examplePlayer4 = new gametypes.Player(3, righthand, deck, discardPile, {table: '.table', sendGreeting: false});
-	var exampleGameMaster = new gametypes.GameMaster(cards, exampleGameType, [examplePlayer], {});
+	var exampleGameMaster = new gametypes.GameMaster(cards, exampleGameType, [examplePlayer, examplePlayer2, examplePlayer3, examplePlayer4], {});
 
 	exampleGameMaster.run();//will throw an error since this is default and not implemented! All methods needed to run a simple game will be required!
 	
