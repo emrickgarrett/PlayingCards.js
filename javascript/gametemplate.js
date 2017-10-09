@@ -167,7 +167,6 @@ var gametypes = (function(){
 				chatCallback: null, //Overriding the chat callback will require you to send the message yourself!
 				toolbarCallback: null
 			}
-			this.activeChannel = 0;
 
 			if (options) {
 				for (var i in options) {
@@ -179,6 +178,9 @@ var gametypes = (function(){
 			if(this.options.channels.length > 1){
 				this.options.hasChannels = true;
 			} 
+
+			this.activeChannel = 0;
+			this.isMaximized = this.options.maximized;
 		},
 
 		toString: function(){
@@ -236,12 +238,14 @@ var gametypes = (function(){
 			this.el.height(this.options.height);
 			this.el.show();
 			this.toolbar.maximize();
+			this.isMaximized = true;
 		},
 
 		minimize: function(){
 			this.input.hide();
 			this.el.height(this.toolbar.size);
 			this.toolbar.minimize();
+			this.isMaximized = false;
 		},
 
 		close: function(){
@@ -275,7 +279,9 @@ var gametypes = (function(){
 		switchChannel: function(channelId){
 			if(this.options.hasChannels){
 				this.toolbar.switchChannel(channelId);
-				this.input.switchChannel(channelId);
+				if(this.isMaximized){
+					this.input.switchChannel(channelId);
+				}
 				this.activeChannel = channelId;
 			}
 		}
