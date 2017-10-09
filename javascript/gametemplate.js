@@ -753,12 +753,14 @@ var gametypes = (function(){
 				var startingY = ev.pageY - chatbox.offset().top;
 				var me = this;
 				this.mouseHasBeenUp = this.mouseHasBeenUp || false;
+				this.mouseHasMoved = this.mouseHasMoved || false;
 
 				chatbox.css({cursor: "move"})
 
 				$(document).mousemove(function(ev){
 					var px = ev.pageX - startingX;
 					var py = ev.pageY - startingY;
+					this.mouseHasMoved = true;
 
 					if($("body").children("#pcjs_chatbox").length === 0 || !me.mouseHasBeenUp){
 						var realX = ev.pageX - (chatbox.position().left - chatbox.offset().left) - startingX;
@@ -779,11 +781,10 @@ var gametypes = (function(){
 							top: py + "px"
 						});
 					}
-
 				});
 
 				$(document).mouseup(function(){
-					me.mouseHasBeenUp = true;
+					if(me.mouseHasMoved){ me.mouseHasBeenUp = true };
 					$(document).unbind("mousemove");
 					$(document).unbind("mouseup");
 					chatbox.css({cursor: "default"})

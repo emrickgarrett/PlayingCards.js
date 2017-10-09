@@ -114,15 +114,6 @@
 	discardPile = new cards.Deck({faceUp:true});
 	discardPile.x += 50;
 
-	$("#deal").click(function(){
-		$("#deal").hide();
-		deck.deal(7, [upperhand, righthand, lowerhand, lefthand], 50, function(){
-
-			discardPile.addCard(deck.topCard());
-			discardPile.render();
-		});
-	});
-
 	deck.click(function(card){
 		if(card === deck.topCard()){
 			lowerhand.addCard(deck.topCard());
@@ -177,9 +168,16 @@
 	var examplePlayer4 = new gametypes.Player(3, righthand, deck, discardPile, {table: '.table', sendGreeting: false});
 	var exampleGameMaster = new gametypes.GameMaster(cards, exampleGameType, [examplePlayer, examplePlayer2, examplePlayer3, examplePlayer4], {});
 
-	exampleGameMaster.run();//will throw an error since this is default and not implemented! All methods needed to run a simple game will be required!
-	
+	//So once the deal button is clicked, the game will start and the cards will be dealt to each player...
+	$("#deal").click(function(){
+		$("#deal").hide();
+		deck.deal(7, [upperhand, righthand, lowerhand, lefthand], 50, function(){
 
+			discardPile.addCard(deck.topCard());
+			discardPile.render();
+			exampleGameMaster.run();//will throw an error since this is default and not implemented! All methods needed to run a simple game will be required!
+		});
+	});
 
 
 
