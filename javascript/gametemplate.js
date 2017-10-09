@@ -796,6 +796,8 @@ var gametypes = (function(){
 				var me = this;
 				this.mouseHasBeenUp = this.mouseHasBeenUp || false;
 
+				chatbox.css({cursor: "move"})
+				
 				$(document).mousemove(function(ev){
 					var px = ev.pageX - startingX;
 					var py = ev.pageY - startingY;
@@ -820,7 +822,6 @@ var gametypes = (function(){
 						});
 					}
 
-					chatbox.css({cursor: "move"})
 				});
 
 				$(document).mouseup(function(){
