@@ -449,7 +449,7 @@ var gametypes = (function(){
 			var options = {
 				messageCSS: defMessageCSS,
 				nameCSS: nameCSS,
-				channel: 0
+				channel: this.caller.activeChannel
 			}
 			if (t_options) {
 				for (var i in t_options) {
@@ -926,7 +926,7 @@ var gametypes = (function(){
 			}
 
 			if(this.options.sendGreeting && this.options.AI){
-				this.AI.sendMessage(this.AI.getGreeting());									
+				this.AI.sendMessage(this.AI.getGreeting(), this.AI.greetingChannel);									
 			}
 
 		},
@@ -1020,17 +1020,17 @@ var gametypes = (function(){
 		}
 	}
 
-	function AI(hand, deck, pile, callback){
-		this.init(hand, deck, pile, callback);
+	function AI(hand, deck, pile, options){
+		this.init(hand, deck, pile, options);
 	}
 
 	AI.prototype = {
-		init: function(hand, deck, pile, callback){
+		init: function(hand, deck, pile, options){
 			this.hand = hand;
 			this.deck = deck;
 			this.pile = pile;
-			this.callback = callback;
 			this.name = this.generateAIName();
+			this.greetingChannel = 0;
 		},
 
 		generateAIName: function(){
@@ -1134,12 +1134,12 @@ var gametypes = (function(){
 			}
 		},
 
-		sendMessage: function(message){
+		sendMessage: function(message, channel){
 			var chatbox = $("#pcjs_chatbox");
 			if(chatbox !== null && typeof chatbox !== "undefined"){
 				var obj = chatbox.data("chatbox");
 				if(obj !== null && typeof obj !== "undefined"){
-					obj.sendMessage(message, this.name);
+					obj.sendMessage(message, this.name, {channel: channel});
 					if(obj.toolbar.isActive === false){
 						obj.toolbar.incrementAlert();
 					}
